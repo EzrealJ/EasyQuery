@@ -1,0 +1,17 @@
+﻿using Ezreal.EasyQuery.ModelBinderProvider;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ezreal.EasyQuery
+{
+    public static class ModelBinderProvidersExtension
+    {
+        public static void AddEasyQuery(this IList<IModelBinderProvider> modelBinderProviders)
+        {
+            modelBinderProviders.Insert(0, new WhereParameterModelBinderProvider());
+            modelBinderProviders.Insert(0, new OrderParameterModelBinderProvider());
+        }
+    }
+}
