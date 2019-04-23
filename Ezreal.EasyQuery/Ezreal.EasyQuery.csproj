@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Version>0.1.1.1</Version>
+    <PackageLicenseUrl>https://github.com/EzrealJ/EasyQuery/blob/master/LICENSE</PackageLicenseUrl>
+    <Authors>Ezreal</Authors>
+    <Description>https://github.com/EzrealJ/EasyQuery</Description>
+    <Copyright>Ezreal</Copyright>
+    <PackageProjectUrl>https://github.com/EzrealJ/EasyQuery/blob/master/LICENSE</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/EzrealJ/EasyQuery/blob/master/LICENSE</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
