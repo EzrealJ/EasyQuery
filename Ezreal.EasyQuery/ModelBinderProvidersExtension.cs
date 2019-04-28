@@ -1,4 +1,5 @@
-﻿using Ezreal.EasyQuery.ModelBinderProvider;
+﻿#if NETSTANDARD2_0
+using Ezreal.EasyQuery.ModelBinderProvider;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
@@ -15,3 +16,5 @@ namespace Ezreal.EasyQuery
         }
     }
 }
+
+#endif

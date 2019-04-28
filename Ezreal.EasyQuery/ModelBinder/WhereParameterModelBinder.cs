@@ -1,3 +1,4 @@
+#if NETSTANDARD2_0
 using Ezreal.EasyQuery.Model;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
@@ -51,3 +52,5 @@ namespace Ezreal.EasyQuery.ModelBinder
         }
     }
 }
+
+#endif
