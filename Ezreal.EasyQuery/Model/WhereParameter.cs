@@ -119,7 +119,7 @@ namespace Ezreal.EasyQuery.Model
                 arg => !arg.ColumnName.IsNullOrWhiteSpace()
                 &&
                 _whereParameterAttributeList.Exists(attr =>
-                attr.ColumnName.Equals(arg.ColumnName.Trim()) &&
+                attr.ColumnName.Contains(arg.ColumnName.Trim()) &&
                 (attr.WherePattern & wherePattern) == wherePattern)).ToList();
             return arguments;
         }
@@ -199,6 +199,8 @@ namespace Ezreal.EasyQuery.Model
     public class WhereParameterArguments<TSource> : WhereParameterArguments
     {
         List<System.Reflection.PropertyInfo> _sourcePropertyInfos = typeof(TSource).GetProperties().ToList();
+        readonly MethodInfo _objectToStringMethod = typeof(object).GetMethod(nameof(object.ToString), new Type[] { });
+        readonly MethodInfo _stringContainsMethod = typeof(string).GetMethod(nameof(string.Contains), new Type[] { typeof(string) });
         public override void InvokeParameterFilter(IEnumerable<WhereParameterAttribute> whereParameterAttributes)
         {
             if (_whereParameterAttributeList.IsNullOrNoItems())
@@ -248,7 +250,7 @@ namespace Ezreal.EasyQuery.Model
             });
             return arguments;
         }
-
+        public Expression<Func<TSource, bool>> GetWhereExpression() => this.GetWhereExpression<TSource>();
         public Expression<Func<TDBOSource, bool>> GetWhereExpression<TDBOSource>()
         {
             Expression where = Expression.Equal(Expression.Constant(1), Expression.Constant(1));
@@ -282,20 +284,19 @@ namespace Ezreal.EasyQuery.Model
                     expressionComposer(nea.Pattern, where, currentExpression);
                 });
 
-                MethodInfo objectToStringMethod = typeof(object).GetMethod(nameof(object.ToString), new Type[] { });
-                MethodInfo stringContainsMethod = typeof(string).GetMethod(nameof(string.Contains), new Type[] { typeof(string) });
+
                 this.LikeArguments?.ForEach(la =>
                 {
                     MemberExpression member = Expression.PropertyOrField(parameter, la.ColumnName);
                     ConstantExpression constant = Expression.Constant(la.ColumnValue.ToString());
-                    Expression currentExpression = Expression.Call(Expression.Call(member, objectToStringMethod), stringContainsMethod, constant);
+                    Expression currentExpression = Expression.Call(Expression.Call(member, _objectToStringMethod), _stringContainsMethod, constant);
                     expressionComposer(la.Pattern, where, currentExpression);
                 });
                 this.NotLikeArguments?.ForEach(nla =>
                 {
                     MemberExpression member = Expression.PropertyOrField(parameter, nla.ColumnName);
                     ConstantExpression constant = Expression.Constant(nla.ColumnValue.ToString());
-                    Expression currentExpression = Expression.Not(Expression.Call(Expression.Call(member, objectToStringMethod), stringContainsMethod, constant));
+                    Expression currentExpression = Expression.Not(Expression.Call(Expression.Call(member, _objectToStringMethod), _stringContainsMethod, constant));
                     expressionComposer(nla.Pattern, where, currentExpression);
                 });
                 this.LessArguments?.ForEach(la =>
@@ -369,7 +370,7 @@ namespace Ezreal.EasyQuery.Model
                     MemberExpression member = Expression.PropertyOrField(parameter, swa.ColumnName);
                     ConstantExpression constant = Expression.Constant(swa.ColumnValue.ToString());
                     var startsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
-                    Expression currentExpression = Expression.Call(Expression.Call(member, objectToStringMethod), startsWithMethod, constant);
+                    Expression currentExpression = Expression.Call(Expression.Call(member, _objectToStringMethod), startsWithMethod, constant);
                     expressionComposer(swa.Pattern, where, currentExpression);
                 });
                 this.EndWithArguments?.ForEach(ewa =>
@@ -378,7 +379,7 @@ namespace Ezreal.EasyQuery.Model
                     MemberExpression member = Expression.PropertyOrField(parameter, ewa.ColumnName);
                     ConstantExpression constant = Expression.Constant(ewa.ColumnValue.ToString());
                     var endsWithMethod = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
-                    Expression currentExpression = Expression.Call(Expression.Call(member, objectToStringMethod), endsWithMethod, constant);
+                    Expression currentExpression = Expression.Call(Expression.Call(member, _objectToStringMethod), endsWithMethod, constant);
                     expressionComposer(ewa.Pattern, where, currentExpression);
                 });
             }

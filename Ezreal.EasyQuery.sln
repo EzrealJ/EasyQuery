@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ezreal.EasyQuery", "Ezreal.EasyQuery\Ezreal.EasyQuery.csproj", "{6F094C36-95BD-4B46-9F37-3CD4C4D201BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ezreal.EasyQuery", "Ezreal.EasyQuery\Ezreal.EasyQuery.csproj", "{6F094C36-95BD-4B46-9F37-3CD4C4D201BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCoreDemo", "AspNetCoreDemo\AspNetCoreDemo.csproj", "{47B1A768-E33E-4EBF-A9F4-F6CCA34BC313}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiClientDemo", "WebApiClientDemo\WebApiClientDemo.csproj", "{802FA59C-0EEF-48EF-8586-60CE070AF0D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{6F094C36-95BD-4B46-9F37-3CD4C4D201BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F094C36-95BD-4B46-9F37-3CD4C4D201BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F094C36-95BD-4B46-9F37-3CD4C4D201BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47B1A768-E33E-4EBF-A9F4-F6CCA34BC313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47B1A768-E33E-4EBF-A9F4-F6CCA34BC313}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47B1A768-E33E-4EBF-A9F4-F6CCA34BC313}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47B1A768-E33E-4EBF-A9F4-F6CCA34BC313}.Release|Any CPU.Build.0 = Release|Any CPU
+		{802FA59C-0EEF-48EF-8586-60CE070AF0D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{802FA59C-0EEF-48EF-8586-60CE070AF0D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{802FA59C-0EEF-48EF-8586-60CE070AF0D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{802FA59C-0EEF-48EF-8586-60CE070AF0D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
