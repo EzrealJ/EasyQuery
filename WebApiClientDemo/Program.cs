@@ -12,21 +12,13 @@ namespace WebApiClientDemo
         static void Main(string[] args)
         {
             Thread.Sleep(10 * 1000);
-            var list = HttpApi.Create<IUserContract>().GetList(new WhereConditionArguments<User>()
-            {
-                LikeArguments = new List<WhereCondition>() {
-                    new Ezreal.EasyQuery.Model.WhereCondition(){
-                        ColumnName=nameof(User.Name),
-                        ColumnValue="测",
-                    },
-                    //将被过滤
-                    new Ezreal.EasyQuery.Model.WhereCondition(){
-                        ColumnName=nameof(User.Age),
-                        ColumnValue="1",
-                    }
-                }
-
-            }).ConfigureAwait(false).GetAwaiter().GetResult();
+            var arg = new WhereConditionArguments<User>();
+            arg.WhereConditions.Add(new WhereCondition() { ColumnName = nameof(User.Name), ColumnValue = "AAA", MatchMode = Ezreal.EasyQuery.Enums.EnumMatchMode.Equal });
+            arg.WhereConditions.Add(new WhereCondition() { ColumnName = nameof(User.Name), ColumnValue = "BBB", MatchMode = Ezreal.EasyQuery.Enums.EnumMatchMode.Like });
+            arg.WhereConditions.Add(new WhereCondition() { ColumnName = nameof(User.Age), ColumnValue = "1", MatchMode = Ezreal.EasyQuery.Enums.EnumMatchMode.Equal });
+            var order = new OrderConditionArguments<User>();
+            order.Add(new OrderCondition() { ColumnName = nameof(User.Name), OrderMode = Ezreal.EasyQuery.Enums.EnumOrderMode.Asc });
+            var list = HttpApi.Create<IUserContract>().GetList(arg, order).ConfigureAwait(false).GetAwaiter().GetResult();
 
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(list));
             Console.ReadKey();

@@ -12,7 +12,6 @@ namespace Ezreal.EasyQuery
         public static void AddEasyQuery(this IList<IModelBinderProvider> modelBinderProviders)
         {
             modelBinderProviders.Insert(0, new WhereConditionModelBinderProvider());
-            modelBinderProviders.Insert(0, new MultilevelWhereParameterModelBinderProvider());
             modelBinderProviders.Insert(0, new OrderConditionModelBinderProvider());
         }
     }

@@ -1,3 +1,4 @@
+using Ezreal.EasyQuery.Enums;
 using Ezreal.Extension.Core;
 using Newtonsoft.Json;
 using System;
@@ -17,18 +18,9 @@ namespace Ezreal.EasyQuery.Model
         /// <summary>
         /// 排序模式["asc"/"desc"]
         /// </summary>
-        public enumOrderPattern Pattern { get; set; }
+        public EnumOrderMode OrderMode { get; set; }
 
-        /// <summary>
-        /// 排序方式
-        /// </summary>
-        [Flags]
-        public enum enumOrderPattern
-        {
-            Asc = 1,
-            Desc = 2,
-            All = 3,
-        }
+
 
     }
 

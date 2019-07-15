@@ -1,23 +1,24 @@
-﻿using System;
+﻿using Ezreal.EasyQuery.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Ezreal.EasyQuery.Model
+namespace Ezreal.EasyQuery.Attributes
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public class WhereConditionFilterAttribute : Attribute
     {
 
         public WhereConditionFilterAttribute(
-    WhereConditionArguments.enumWherePattern wherePattern = WhereConditionArguments.enumWherePattern.Equal)
+    EnumMatchMode wherePattern = EnumMatchMode.Equal)
         {
-            this.WherePattern = wherePattern;
+            this.AllowEnumMatchPattern = wherePattern;
         }
         public WhereConditionFilterAttribute(
-            WhereConditionArguments.enumWherePattern wherePattern = WhereConditionArguments.enumWherePattern.Equal, params string[] columnName)
+            EnumMatchMode wherePattern = EnumMatchMode.Equal, params string[] columnName)
         {
             ColumnName = columnName;
-            this.WherePattern = wherePattern;
+            this.AllowEnumMatchPattern = wherePattern;
         }
 
         /// <summary>
@@ -27,7 +28,7 @@ namespace Ezreal.EasyQuery.Model
         /// <summary>
         /// 匹配方式
         /// </summary>
-        public virtual WhereConditionArguments.enumWherePattern WherePattern { get; private set; }
+        public virtual EnumMatchMode AllowEnumMatchPattern { get; private set; }
 
 
     }

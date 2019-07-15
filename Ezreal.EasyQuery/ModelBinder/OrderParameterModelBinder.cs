@@ -1,7 +1,10 @@
 #if NETSTANDARD2_0
+using Ezreal.EasyQuery.Attributes;
+using Ezreal.EasyQuery.Interpret;
 using Ezreal.EasyQuery.Model;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,22 +38,29 @@ namespace Ezreal.EasyQuery.ModelBinder
                 await Task.CompletedTask;
                 return;
             }
-            OrderConditionArguments whereParameterArguments = Activator.CreateInstance(bindingContext.ModelType) as OrderConditionArguments;
+
+            if (!requestString.StartsWith("["))
+            {
+                requestString = $"[{requestString}]";
+            }
+
+            OrderConditionArguments orderConditionArguments = JsonConvert.DeserializeObject(requestString, bindingContext.ModelType) as OrderConditionArguments;
             try
             {
-                IEnumerable<OrderConditionFilterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
+                IEnumerable<OrderConditionFilterAttribute> orderConditionFilterAttribute = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
                     .Where(attr => attr.GetType() == typeof(OrderConditionFilterAttribute)).Select(attr => attr as OrderConditionFilterAttribute);
-                whereParameterArguments.InvokeParameterFilter(whereParameterAttributes);
-                whereParameterArguments.InitializeFromJsonObjectString(requestString);
+                var orderConditionArgumentsInterpret = new OrderConditionArgumentsInterpret();
+                orderConditionArguments = orderConditionArgumentsInterpret.CheckConstraint(orderConditionArguments, orderConditionFilterAttribute.ToList());
+
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, ex.Message);
                 await Task.CompletedTask;
                 return;
             }
 
-            bindingContext.Result = ModelBindingResult.Success(whereParameterArguments);
+            bindingContext.Result = ModelBindingResult.Success(orderConditionArguments);
             await Task.CompletedTask;
             return;
         }

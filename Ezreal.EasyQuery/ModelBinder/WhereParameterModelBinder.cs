@@ -1,7 +1,10 @@
 #if NETSTANDARD2_0
+using Ezreal.EasyQuery.Attributes;
+using Ezreal.EasyQuery.Interpret;
 using Ezreal.EasyQuery.Model;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,15 +38,17 @@ namespace Ezreal.EasyQuery.ModelBinder
                 await Task.CompletedTask;
                 return;
             }
-            WhereConditionArguments whereParameterArguments = Activator.CreateInstance(bindingContext.ModelType) as WhereConditionArguments;
+            WhereConditionArguments whereParameterArguments = JsonConvert.DeserializeObject(requestString, bindingContext.ModelType) as WhereConditionArguments;
             try
             {
                 IEnumerable<WhereConditionFilterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
                     .Where(attr => attr.GetType() == typeof(WhereConditionFilterAttribute)).Select(attr => attr as WhereConditionFilterAttribute);
-                whereParameterArguments.InvokeParameterFilter(whereParameterAttributes);
-                whereParameterArguments.InitializeFromJsonObjectString(requestString);
+                var whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpret();
+                whereParameterArguments = whereConditionArgumentsInterpret.CheckConstraint(whereParameterArguments, whereParameterAttributes.ToList());
+                whereParameterArguments = whereConditionArgumentsInterpret.Parse(whereParameterArguments);
+
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, ex.Message);
                 await Task.CompletedTask;
