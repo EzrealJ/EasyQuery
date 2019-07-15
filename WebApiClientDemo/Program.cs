@@ -12,19 +12,17 @@ namespace WebApiClientDemo
         static void Main(string[] args)
         {
             Thread.Sleep(10 * 1000);
-            var list = HttpApi.Create<IUserContract>().GetList(new WhereParameterArguments<User>()
+            var list = HttpApi.Create<IUserContract>().GetList(new WhereConditionArguments<User>()
             {
-                LikeArguments = new List<WhereParameter>() {
-                    new Ezreal.EasyQuery.Model.WhereParameter(){
+                LikeArguments = new List<WhereCondition>() {
+                    new Ezreal.EasyQuery.Model.WhereCondition(){
                         ColumnName=nameof(User.Name),
                         ColumnValue="测",
-                        Pattern=Ezreal.EasyQuery.Model.WhereParameter.enumJoinPattern.And
                     },
                     //将被过滤
-                    new Ezreal.EasyQuery.Model.WhereParameter(){
+                    new Ezreal.EasyQuery.Model.WhereCondition(){
                         ColumnName=nameof(User.Age),
                         ColumnValue="1",
-                        Pattern=Ezreal.EasyQuery.Model.WhereParameter.enumJoinPattern.And
                     }
                 }
 

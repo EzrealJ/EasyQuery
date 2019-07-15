@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Ezreal.EasyQuery.ModelBinder
 {
-    public class WhereParameterModelBinder : IModelBinder
+    public class WhereConditionModelBinder : IModelBinder
     {
-        public Task BindModelAsync(ModelBindingContext bindingContext)
+        public async Task BindModelAsync(ModelBindingContext bindingContext)
         {
             if (bindingContext == null)
             {
@@ -25,30 +25,34 @@ namespace Ezreal.EasyQuery.ModelBinder
             ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
             if (valueProviderResult == ValueProviderResult.None)
             {
-                return Task.CompletedTask;
+                await Task.CompletedTask;
+                return;
             }
             bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
             string requestString = valueProviderResult.FirstValue;
             if (string.IsNullOrEmpty(requestString))
             {
-                return Task.CompletedTask;
+                await Task.CompletedTask;
+                return;
             }
-            WhereParameterArguments whereParameterArguments = Activator.CreateInstance(bindingContext.ModelType) as WhereParameterArguments;
+            WhereConditionArguments whereParameterArguments = Activator.CreateInstance(bindingContext.ModelType) as WhereConditionArguments;
             try
             {
-                IEnumerable<WhereParameterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
-                    .Where(attr => attr.GetType() == typeof(WhereParameterAttribute)).Select(attr => attr as WhereParameterAttribute);
+                IEnumerable<WhereConditionFilterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
+                    .Where(attr => attr.GetType() == typeof(WhereConditionFilterAttribute)).Select(attr => attr as WhereConditionFilterAttribute);
                 whereParameterArguments.InvokeParameterFilter(whereParameterAttributes);
                 whereParameterArguments.InitializeFromJsonObjectString(requestString);
             }
             catch (Exception ex)
             {
                 bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, ex.Message);
-                return Task.CompletedTask;
+                await Task.CompletedTask;
+                return;
             }
 
             bindingContext.Result = ModelBindingResult.Success(whereParameterArguments);
-            return Task.CompletedTask;
+            await Task.CompletedTask;
+            return;
         }
     }
 }

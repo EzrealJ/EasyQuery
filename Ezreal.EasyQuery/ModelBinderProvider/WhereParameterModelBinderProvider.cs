@@ -7,7 +7,7 @@ using System;
 
 namespace Ezreal.EasyQuery.ModelBinderProvider
 {
-    public class WhereParameterModelBinderProvider : IModelBinderProvider
+    public class WhereConditionModelBinderProvider : IModelBinderProvider
     {
         public IModelBinder GetBinder(ModelBinderProviderContext context)
         {
@@ -17,9 +17,9 @@ namespace Ezreal.EasyQuery.ModelBinderProvider
             }
 
             if (context.Metadata.ModelType.IsGenericType &&
-                context.Metadata.ModelType.GetGenericTypeDefinition() == typeof(WhereParameterArguments<>))
+                context.Metadata.ModelType.GetGenericTypeDefinition() == typeof(WhereConditionArguments<>))
             {
-                return new BinderTypeModelBinder(typeof(WhereParameterModelBinder));
+                return new BinderTypeModelBinder(typeof(WhereConditionModelBinder));
             }
 
             return null;

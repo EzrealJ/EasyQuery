@@ -1,13 +1,15 @@
-#if NETSTANDARD2_0
+﻿#if NETSTANDARD2_0
 using Ezreal.EasyQuery.Model;
 using Ezreal.EasyQuery.ModelBinder;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Ezreal.EasyQuery.ModelBinderProvider
 {
-    public class OrderConditionModelBinderProvider : IModelBinderProvider
+    public class MultilevelWhereParameterModelBinderProvider : IModelBinderProvider
     {
         public IModelBinder GetBinder(ModelBinderProviderContext context)
         {
@@ -17,9 +19,9 @@ namespace Ezreal.EasyQuery.ModelBinderProvider
             }
 
             if (context.Metadata.ModelType.IsGenericType &&
-                context.Metadata.ModelType.GetGenericTypeDefinition() == typeof(OrderConditionArguments<>))
+                context.Metadata.ModelType.GetGenericTypeDefinition() == typeof(MultilevelWhereConditionArguments<>))
             {
-                return new BinderTypeModelBinder(typeof(OrderConditionModelBinder));
+                return new BinderTypeModelBinder(typeof(MultilevelWhereParameterModelBinder));
             }
 
             return null;

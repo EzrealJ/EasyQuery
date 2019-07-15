@@ -1,15 +1,16 @@
-#if NETSTANDARD2_0
+﻿#if NETSTANDARD2_0
 using Ezreal.EasyQuery.Model;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Ezreal.EasyQuery.ModelBinder
 {
-    public class OrderConditionModelBinder : IModelBinder
+    public class MultilevelWhereParameterModelBinder : IModelBinder
     {
         public async Task BindModelAsync(ModelBindingContext bindingContext)
         {
@@ -35,13 +36,13 @@ namespace Ezreal.EasyQuery.ModelBinder
                 await Task.CompletedTask;
                 return;
             }
-            OrderConditionArguments whereParameterArguments = Activator.CreateInstance(bindingContext.ModelType) as OrderConditionArguments;
+            MultilevelWhereConditionArguments multilevelWhereConditionArguments = Activator.CreateInstance(bindingContext.ModelType) as MultilevelWhereConditionArguments;
             try
             {
-                IEnumerable<OrderConditionFilterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
-                    .Where(attr => attr.GetType() == typeof(OrderConditionFilterAttribute)).Select(attr => attr as OrderConditionFilterAttribute);
-                whereParameterArguments.InvokeParameterFilter(whereParameterAttributes);
-                whereParameterArguments.InitializeFromJsonObjectString(requestString);
+                IEnumerable<WhereConditionFilterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
+                    .Where(attr => attr.GetType() == typeof(WhereConditionFilterAttribute)).Select(attr => attr as WhereConditionFilterAttribute);
+                multilevelWhereConditionArguments.InvokeParameterFilter(whereParameterAttributes);
+                multilevelWhereConditionArguments.InitializeFromJsonObjectString(requestString);
             }
             catch (Exception ex)
             {
@@ -50,11 +51,10 @@ namespace Ezreal.EasyQuery.ModelBinder
                 return;
             }
 
-            bindingContext.Result = ModelBindingResult.Success(whereParameterArguments);
+            bindingContext.Result = ModelBindingResult.Success(multilevelWhereConditionArguments);
             await Task.CompletedTask;
             return;
         }
     }
 }
-
 #endif
