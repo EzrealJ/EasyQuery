@@ -9,9 +9,15 @@ using System.Text;
 
 namespace Ezreal.EasyQuery.Model
 {
-    public class WhereConditionArguments : IMultilevelable
+    public class WhereConditionArguments 
     {
+        /// <summary>
+        /// 内部组合条件的集合
+        /// </summary>
         public List<WhereConditionArguments> InnerWhereConditionArguments { get; set; } = new List<WhereConditionArguments>();
+        /// <summary>
+        /// 平铺条件的集合
+        /// </summary>
         public List<WhereCondition> WhereConditions { get; set; } = new List<WhereCondition>();
 
         /// <summary>
@@ -43,7 +49,12 @@ namespace Ezreal.EasyQuery.Model
             {
                 if (item is WhereConditionArguments conditionArguments)
                 {
-                    where = SpliceExpression(where, conditionArguments.GetExpression<TSource>(parameter));
+                    Expression right = conditionArguments.GetExpression<TSource>(parameter);
+                    if (right != null)
+                    {
+                        where = SpliceExpression(where, right);
+                    }                    
+                   
                 }
             }
             return where;

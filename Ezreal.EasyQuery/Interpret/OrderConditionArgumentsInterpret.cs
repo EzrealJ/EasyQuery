@@ -14,8 +14,8 @@ namespace Ezreal.EasyQuery.Interpret
         /// <summary>
         /// 校验约束
         /// </summary>
-        /// <param name="arguments"></param>
-        /// <param name="wherePattern"></param>
+        /// <param name="orderConditionArguments"></param>
+        /// <param name="orderConditionFilterAttribute"></param>
         /// <returns></returns>
         public virtual OrderConditionArguments CheckConstraint(OrderConditionArguments orderConditionArguments, List<OrderConditionFilterAttribute> orderConditionFilterAttribute = null)
         {
@@ -28,9 +28,11 @@ namespace Ezreal.EasyQuery.Interpret
             foreach (OrderCondition item in orderConditionArguments)
             {
 
-                if (!orderConditionFilterAttribute.Exists(f
-                    => f.ColumnName.Contains(item.ColumnName)
-                    && (f.AllowOrderMode & item.OrderMode) == item.OrderMode))
+                if (!orderConditionFilterAttribute.IsNullOrNoItems() && !orderConditionFilterAttribute.Exists(f
+                     => (f.ColumnName.IsNullOrNoItems() ||
+                   (!f.ColumnName.IsNullOrNoItems() && f.ColumnName.Contains(item.ColumnName))
+                   )
+                     && (f.AllowOrderMode & item.OrderMode) == item.OrderMode))
                 {
                     removeList.Add(item);
                 }

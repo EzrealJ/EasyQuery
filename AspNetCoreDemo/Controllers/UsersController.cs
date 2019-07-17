@@ -16,9 +16,9 @@ namespace AspNetCoreDemo.Controllers
     {
         [HttpPost("GetList")]
         public async Task<IEnumerable<User>> GetList(
-     [WhereConditionFilter(EnumMatchMode.Like,nameof(Models.User.Name))]
+     //[WhereConditionFilter(EnumMatchMode.All)]
      [FromForm]WhereConditionArguments<User> whereParameterArguments = null,
-      [OrderConditionFilter(EnumOrderMode.Asc,nameof(Models.User.Name))]
+      //[OrderConditionFilter(EnumOrderMode.Asc,nameof(Models.User.Name))]
     [FromForm]OrderConditionArguments<User> orderConditionArguments = null)
         {
             Console.WriteLine(whereParameterArguments?.GetWhereLambdaExpression<User>().ToString());

@@ -6,7 +6,7 @@ namespace Ezreal.EasyQuery.Test
 {
     public class TestClassA
     {
-        public int A { get; set; }
+        public int? A { get; set; }
 
         public string B { get; set; }
 

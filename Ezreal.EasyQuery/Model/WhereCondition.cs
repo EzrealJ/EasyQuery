@@ -11,7 +11,7 @@ namespace Ezreal.EasyQuery.Model
 {
 
 
-    public class WhereCondition : IMultilevelable
+    public class WhereCondition
     {
         /// <summary>
         /// 搜索列
@@ -21,21 +21,46 @@ namespace Ezreal.EasyQuery.Model
         /// 搜索值
         /// </summary>
         public object ColumnValue { get; set; }
-
+        /// <summary>
+        /// 匹配模式
+        /// </summary>
         public EnumMatchMode MatchMode { get; set; }
+
+        //public StringComparison StringComparison { get; set; }
 
         private static readonly MethodInfo _objectToStringMethod = typeof(object).GetMethod(nameof(object.ToString), new Type[] { });
         private static readonly MethodInfo _stringContainsMethod = typeof(string).GetMethod(nameof(string.Contains), new Type[] { typeof(string) });
-        private static readonly MethodInfo _stringStartsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
-        private static readonly MethodInfo _stringEndsWithMethod = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
+        private static readonly MethodInfo _stringStartsWithMethod = typeof(string).GetMethod(nameof(string.StartsWith), new Type[] { typeof(string) });
+        private static readonly MethodInfo _stringEndsWithMethod = typeof(string).GetMethod(nameof(string.EndsWith), new Type[] { typeof(string) });
+        private static readonly MethodInfo _stringToLowerMethod = typeof(string).GetMethod(nameof(string.ToLower), new Type[] { });
+        private static readonly MethodInfo _enumerableContainsMethod = typeof(Enumerable).GetMethods().FirstOrDefault(m => m.IsGenericMethod && m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
+
+        public WhereCondition(string columnName, object columnValue, EnumMatchMode matchMode)
+        {
+            ColumnName = columnName ?? throw new ArgumentNullException(nameof(columnName));
+            ColumnValue = columnValue ?? throw new ArgumentNullException(nameof(columnValue));
+            MatchMode = matchMode;
+        }
+
+        public WhereCondition()
+        {
+        }
+
         /// <summary>
         /// 获取表达式
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public Expression GetExpression<TSource>(ParameterExpression parameter)
+        public virtual Expression GetExpression<TSource>(ParameterExpression parameter)
         {
             MemberExpression member = Expression.PropertyOrField(parameter, this.ColumnName);
+            if (member.Type.IsGenericType && member.Type.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+            {
+                if (this.ColumnValue != null)
+                {
+                    member = Expression.Property(member, "Value");
+                }
+            }
             if (this.MatchMode == EnumMatchMode.Equal)
             {
                 ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
@@ -49,13 +74,20 @@ namespace Ezreal.EasyQuery.Model
             if (this.MatchMode == EnumMatchMode.Like)
             {
                 ConstantExpression constant = Expression.Constant(this.ColumnValue.ToString());
-                return Expression.Call(Expression.Call(member, _objectToStringMethod), _stringContainsMethod, constant);
+                Expression currentExpression = member.Type == typeof(string) ? (Expression)member : Expression.Call(member, _objectToStringMethod);
+                currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
+                currentExpression = Expression.Call(currentExpression, _stringContainsMethod, Expression.Call(constant, _stringToLowerMethod));
+                return AttachNotNullCheckExpression(member, currentExpression);
 
             }
             if (this.MatchMode == EnumMatchMode.NotLike)
             {
                 ConstantExpression constant = Expression.Constant(this.ColumnValue.ToString());
-                return Expression.Not(Expression.Call(Expression.Call(member, _objectToStringMethod), _stringContainsMethod, constant));
+                Expression currentExpression = member.Type == typeof(string) ? (Expression)member : Expression.Call(member, _objectToStringMethod);
+                currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
+                currentExpression = Expression.Call(currentExpression, _stringContainsMethod, Expression.Call(constant, _stringToLowerMethod));
+                currentExpression = Expression.Not(currentExpression);
+                return AttachNotNullCheckExpression(member, currentExpression);
 
             }
             if (this.MatchMode == EnumMatchMode.Less)
@@ -103,7 +135,7 @@ namespace Ezreal.EasyQuery.Model
             {
                 ConstantExpression constant = Expression.Constant(this.ColumnValue);
                 Type targetType = member.Type;
-                MethodInfo containsMethod = typeof(Enumerable).GetMethods().FirstOrDefault(m => m.IsGenericMethod && m.Name == "Contains" && m.GetParameters().Length == 2).MakeGenericMethod(targetType);
+                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(targetType);
                 return Expression.Call(null, containsMethod, Expression.TypeAs(constant, typeof(IEnumerable<>).MakeGenericType(targetType)), member);
 
             }
@@ -111,7 +143,7 @@ namespace Ezreal.EasyQuery.Model
             {
                 ConstantExpression constant = Expression.Constant(this.ColumnValue);
                 Type targetType = member.Type;
-                MethodInfo containsMethod = typeof(Enumerable).GetMethods().FirstOrDefault(m => m.IsGenericMethod && m.Name == "Contains" && m.GetParameters().Length == 2).MakeGenericMethod(targetType);
+                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(targetType);
                 return Expression.Not(Expression.Call(null, containsMethod, Expression.TypeAs(constant, typeof(IEnumerable<>).MakeGenericType(targetType)), member));
 
             }
@@ -119,7 +151,7 @@ namespace Ezreal.EasyQuery.Model
             {
                 ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
 
-                return Expression.Call(Expression.Call(member, _objectToStringMethod), _stringStartsWithMethod, constant);
+                return AttachNotNullCheckExpression(member, Expression.Call(Expression.Call(member, _objectToStringMethod), _stringStartsWithMethod, constant));
 
             }
 
@@ -127,18 +159,29 @@ namespace Ezreal.EasyQuery.Model
             {
                 ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
 
-                return Expression.Call(Expression.Call(member, _objectToStringMethod), _stringEndsWithMethod, constant);
+                return AttachNotNullCheckExpression(member, Expression.Call(Expression.Call(member, _objectToStringMethod), _stringEndsWithMethod, constant));
 
             }
             return null;
         }
 
 
+        private Expression AttachNotNullCheckExpression(MemberExpression nullCheckMember, Expression attachExpression)
+        {
+            if (typeof(ValueType).IsAssignableFrom(nullCheckMember.Type))
+            {
+                return attachExpression;
+            }
+            return Expression.AndAlso(Expression.NotEqual(nullCheckMember, Expression.Constant(null)), attachExpression);
+        }
+
+
+
         /// <summary>
-        /// 将值类型转化为本地类型
+        /// 将目标对象的类型转化为预期类型
         /// </summary>
-        /// <param name="memberType"></param>
-        /// <param name="value"></param>
+        /// <param name="memberType">目标类型</param>
+        /// <param name="value">将要转化的对象</param>
         /// <returns></returns>
         protected virtual object ChangeValueTypeToMemberType(Type memberType, object value)
         {

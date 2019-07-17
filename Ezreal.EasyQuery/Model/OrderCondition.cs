@@ -11,6 +11,14 @@ namespace Ezreal.EasyQuery.Model
 {
     public class OrderCondition
     {
+
+
+        public OrderCondition(string columnName, EnumOrderMode orderMode)
+        {
+            ColumnName = columnName ?? throw new ArgumentNullException(nameof(columnName));
+            OrderMode = orderMode;
+        }
+
         /// <summary>
         /// 排序列
         /// </summary>

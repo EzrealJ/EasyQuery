@@ -19,8 +19,8 @@ namespace Ezreal.EasyQuery.Interpret
         /// <summary>
         /// 校验约束
         /// </summary>
-        /// <param name="arguments"></param>
-        /// <param name="wherePattern"></param>
+        /// <param name="whereConditionArguments"></param>
+        /// <param name="whereConditionFilterList"></param>
         /// <returns></returns>
         public virtual WhereConditionArguments CheckConstraint(WhereConditionArguments whereConditionArguments, List<WhereConditionFilterAttribute> whereConditionFilterList = null)
         {
@@ -34,9 +34,11 @@ namespace Ezreal.EasyQuery.Interpret
             {
                 if (item is WhereCondition whereCondition)
                 {
-                    if (!whereConditionFilterList.Exists(f
-                        => f.ColumnName.Contains(whereCondition.ColumnName)
-                        && (f.AllowEnumMatchPattern & whereCondition.MatchMode) == whereCondition.MatchMode))
+                    if (!whereConditionFilterList.IsNullOrNoItems() && !whereConditionFilterList.Exists(f
+                         =>
+                  (f.ColumnName.IsNullOrNoItems() || 
+                  (!f.ColumnName.IsNullOrNoItems() && f.ColumnName.Contains(whereCondition.ColumnName))
+                  ) && (f.AllowEnumMatchPattern & whereCondition.MatchMode) == whereCondition.MatchMode))
                     {
                         removeList.Add(item);
                     }

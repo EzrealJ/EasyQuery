@@ -6,12 +6,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace Ezreal.EasyQuery.Model
 {
     public class OrderConditionArguments : List<OrderCondition>
     {
+        public static readonly MethodInfo[] _queryableMethods = typeof(Queryable).GetMethods();
+        private static readonly MethodInfo _orderByMethod = _queryableMethods.FirstOrDefault(m => m.IsGenericMethod && m.Name == nameof(Queryable.OrderBy) && m.GetParameters().Length == 2);
+        private static readonly MethodInfo _orderByDescendingMethod = _queryableMethods.FirstOrDefault(m => m.IsGenericMethod && m.Name == nameof(Queryable.OrderByDescending) && m.GetParameters().Length == 2);
+        private static readonly MethodInfo _thenByMethod = _queryableMethods.FirstOrDefault(m => m.IsGenericMethod && m.Name == nameof(Queryable.ThenBy) && m.GetParameters().Length == 2);
+        private static readonly MethodInfo _thenByDescendingMethod = _queryableMethods.FirstOrDefault(m => m.IsGenericMethod && m.Name == nameof(Queryable.ThenByDescending) && m.GetParameters().Length == 2);
         public virtual IQueryable<TDBOSource> GetOrderedQueryable<TDBOSource>(IQueryable<TDBOSource> queryable)
         {
             if (queryable == null)
@@ -23,22 +29,35 @@ namespace Ezreal.EasyQuery.Model
             this.ForEach(order =>
             {
                 MemberExpression member = Expression.PropertyOrField(parameter, order.ColumnName);
-
+                Type funcType = typeof(Func<,>).MakeGenericType(typeof(TDBOSource), member.Type);
                 string queryableExpressionString = queryable.Expression.ToString();
                 if (IsOrdered && (queryableExpressionString.Contains(nameof(Queryable.OrderBy)) || queryableExpressionString.Contains(nameof(Queryable.OrderByDescending))))
                 {
-                    queryable = order.OrderMode == EnumOrderMode.Asc ?
-                    (queryable as IOrderedQueryable<TDBOSource>).ThenBy(Expression.Lambda<Func<TDBOSource, dynamic>>(member, parameter))
-                    :
-                    (queryable as IOrderedQueryable<TDBOSource>).ThenByDescending(Expression.Lambda<Func<TDBOSource, dynamic>>(member, new[] { parameter }));
+                    IOrderedQueryable<TDBOSource> orderedQueryable = queryable as IOrderedQueryable<TDBOSource>;
+                    if (order.OrderMode == EnumOrderMode.Asc)
+                    {
+                        MethodInfo method = _thenByMethod.MakeGenericMethod(typeof(TDBOSource), member.Type);
+                        queryable = method.Invoke(null, new object[] { orderedQueryable, Expression.Lambda(funcType, member, parameter) }) as IOrderedQueryable<TDBOSource>;
+                    }
+                    else
+                    {
+                        MethodInfo method = _thenByDescendingMethod.MakeGenericMethod(typeof(TDBOSource), member.Type);
+                        queryable = method.Invoke(null, new object[] { orderedQueryable, Expression.Lambda(funcType, member, parameter) }) as IOrderedQueryable<TDBOSource>;
+                    }
+
                 }
                 else
                 {
-                    queryable = order.OrderMode == EnumOrderMode.Asc ?
-                        (queryable).OrderBy(Expression.Lambda<Func<TDBOSource, dynamic>>(member, parameter))
-                        :
-                        (queryable).OrderByDescending(Expression.Lambda<Func<TDBOSource, dynamic>>(member, new[] { parameter }));
-                    IsOrdered = true;
+                    if (order.OrderMode == EnumOrderMode.Asc)
+                    {
+                        MethodInfo method = _orderByMethod.MakeGenericMethod(typeof(TDBOSource), member.Type);
+                        queryable = method.Invoke(null, new object[] { queryable, Expression.Lambda(funcType, member, parameter) }) as IOrderedQueryable<TDBOSource>;
+                    }
+                    else
+                    {
+                        MethodInfo method = _orderByDescendingMethod.MakeGenericMethod(typeof(TDBOSource), member.Type);
+                        queryable = method.Invoke(null, new object[] { queryable, Expression.Lambda(funcType, member, parameter) }) as IOrderedQueryable<TDBOSource>;
+                    }
                 }
             });
 
