@@ -17,9 +17,9 @@ namespace AspNetCoreDemo.Controllers
         [HttpPost("GetList")]
         public async Task<IEnumerable<User>> GetList(
      //[WhereConditionFilter(EnumMatchMode.All)]
-     [FromForm]WhereConditionArguments<User> whereParameterArguments = null,
-      //[OrderConditionFilter(EnumOrderMode.Asc,nameof(Models.User.Name))]
-    [FromForm]OrderConditionArguments<User> orderConditionArguments = null)
+     [FromQuery]WhereConditionArguments<User> whereParameterArguments = null,
+    //[OrderConditionFilter(EnumOrderMode.Asc,nameof(Models.User.Name))]
+    [FromQuery]OrderConditionArguments<User> orderConditionArguments = null)
         {
             Console.WriteLine(whereParameterArguments?.GetWhereLambdaExpression<User>().ToString());
             Console.WriteLine(orderConditionArguments.GetOrderedQueryable(new List<User>().AsQueryable()).Expression.ToString());
@@ -29,5 +29,7 @@ namespace AspNetCoreDemo.Controllers
                 new User{ Name="BBB",Age=2},
             });
         }
+
+
     }
 }

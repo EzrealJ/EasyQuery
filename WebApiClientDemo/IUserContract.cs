@@ -12,8 +12,8 @@ namespace WebApiClientDemo
     {
 
         [HttpPost("api/Users/GetList")]
-        ITask<IEnumerable<User>> GetList([JsonMulitpartText]WhereConditionArguments<User> whereParameterArguments = null, [JsonMulitpartText]OrderConditionArguments<User> orderConditionArguments = null, System.TimeSpan? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        ITask<IEnumerable<User>> GetList([JsonPathQueryFieldAttribute]WhereConditionArguments<User> whereParameterArguments = null, [JsonPathQueryFieldAttribute]OrderConditionArguments<User> orderConditionArguments = null, System.TimeSpan? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
-    
+
     }
 }

@@ -36,7 +36,7 @@ namespace Ezreal.EasyQuery.Interpret
                 {
                     if (!whereConditionFilterList.IsNullOrNoItems() && !whereConditionFilterList.Exists(f
                          =>
-                  (f.ColumnName.IsNullOrNoItems() || 
+                  (f.ColumnName.IsNullOrNoItems() ||
                   (!f.ColumnName.IsNullOrNoItems() && f.ColumnName.Contains(whereCondition.ColumnName))
                   ) && (f.AllowEnumMatchPattern & whereCondition.MatchMode) == whereCondition.MatchMode))
                     {

@@ -18,8 +18,8 @@ namespace Ezreal.EasyQuery.Model
         public virtual Expression<Func<TDBOSource, bool>> GetWhereLambdaExpression<TDBOSource>()
         {
             ParameterExpression parameter = Expression.Parameter(typeof(TDBOSource), "t");
-
             Expression where = GetExpression<TDBOSource>(parameter);
+            if (where.IsNull()) return null;
             Expression<Func<TDBOSource, bool>> expression = Expression.Lambda<Func<TDBOSource, bool>>(where, parameter);
             return expression;
         }

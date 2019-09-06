@@ -33,6 +33,7 @@ namespace Ezreal.EasyQuery.Model
         private static readonly MethodInfo _stringStartsWithMethod = typeof(string).GetMethod(nameof(string.StartsWith), new Type[] { typeof(string) });
         private static readonly MethodInfo _stringEndsWithMethod = typeof(string).GetMethod(nameof(string.EndsWith), new Type[] { typeof(string) });
         private static readonly MethodInfo _stringToLowerMethod = typeof(string).GetMethod(nameof(string.ToLower), new Type[] { });
+
         private static readonly MethodInfo _enumerableContainsMethod = typeof(Enumerable).GetMethods().FirstOrDefault(m => m.IsGenericMethod && m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
 
         public WhereCondition(string columnName, object columnValue, EnumMatchMode matchMode)
@@ -133,18 +134,30 @@ namespace Ezreal.EasyQuery.Model
             }
             if (this.MatchMode == EnumMatchMode.In)
             {
-                ConstantExpression constant = Expression.Constant(this.ColumnValue);
-                Type targetType = member.Type;
-                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(targetType);
-                return Expression.Call(null, containsMethod, Expression.TypeAs(constant, typeof(IEnumerable<>).MakeGenericType(targetType)), member);
+                Type listType = typeof(List<>).MakeGenericType(member.Type);
+                MethodInfo _listAddMethod = listType.GetMethod("Add");
+                object list = Activator.CreateInstance(listType);
+                foreach (var item in this.ColumnValue as Array)
+                {
+                    _listAddMethod.Invoke(list, new[] { ChangeValueTypeToMemberType(member.Type, item) });
+                }
+                ConstantExpression constant = Expression.Constant(list);
+                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(member.Type);
+                return Expression.Call(null, containsMethod, constant, member);
 
             }
             if (this.MatchMode == EnumMatchMode.NotIn)
             {
-                ConstantExpression constant = Expression.Constant(this.ColumnValue);
-                Type targetType = member.Type;
-                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(targetType);
-                return Expression.Not(Expression.Call(null, containsMethod, Expression.TypeAs(constant, typeof(IEnumerable<>).MakeGenericType(targetType)), member));
+                Type listType = typeof(List<>).MakeGenericType(member.Type);
+                MethodInfo _listAddMethod = listType.GetMethod("Add");
+                object list = Activator.CreateInstance(listType);
+                foreach (var item in this.ColumnValue as Array)
+                {
+                    _listAddMethod.Invoke(list, new[] { ChangeValueTypeToMemberType(member.Type, item) });
+                }
+                ConstantExpression constant = Expression.Constant(list);
+                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(member.Type);
+                return Expression.Not(Expression.Call(null, containsMethod, Expression.TypeAs(constant, typeof(IEnumerable<>).MakeGenericType(member.Type)), member));
 
             }
             if (this.MatchMode == EnumMatchMode.StartWith)
@@ -187,7 +200,11 @@ namespace Ezreal.EasyQuery.Model
         {
             Type targetType = memberType;
             object returnValue = null;
-            if (targetType.IsGenericType && targetType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+            if (typeof(Enum).IsAssignableFrom(targetType))
+            {
+                returnValue = Enum.Parse(targetType, value?.ToString());
+            }
+            else if (targetType.IsGenericType && targetType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
             {
                 if (value != null)
                 {
@@ -198,7 +215,9 @@ namespace Ezreal.EasyQuery.Model
                     returnValue = value;
                 }
             }
-            if (!(targetType.IsGenericType && targetType.GetGenericTypeDefinition().Equals(typeof(Nullable<>))))
+            else
+
+            //if (!(targetType.IsGenericType && targetType.GetGenericTypeDefinition().Equals(typeof(Nullable<>))))
             {
                 if (typeof(IConvertible).IsAssignableFrom(targetType))
                 {
