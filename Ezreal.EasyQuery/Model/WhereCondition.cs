@@ -126,6 +126,7 @@ namespace Ezreal.EasyQuery.Model
             }
             if (this.MatchMode == EnumMatchMode.NotBetween)
             {
+                
                 object[] valueArray = this.ColumnValue as object[];
                 ConstantExpression constantStart = Expression.Constant(ChangeValueTypeToMemberType(member.Type, valueArray[0]));
                 ConstantExpression constantEnd = Expression.Constant(ChangeValueTypeToMemberType(member.Type, valueArray[1]));
