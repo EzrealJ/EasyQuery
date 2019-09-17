@@ -10,7 +10,7 @@
     <TargetFrameworks>netstandard2.0;net45;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>0.3.7</Version>
+    <Version>0.3.8</Version>
     <PackageLicenseUrl>https://github.com/EzrealJ/EasyQuery/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Ezreal</Authors>
     <Description>https://github.com/EzrealJ/EasyQuery</Description>
