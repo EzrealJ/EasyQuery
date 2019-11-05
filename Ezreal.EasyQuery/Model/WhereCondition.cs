@@ -210,9 +210,13 @@ namespace Ezreal.EasyQuery.Model
                 {
                     targetType = targetType.GenericTypeArguments[0];
                 }
-                else
+                if (typeof(IConvertible).IsAssignableFrom(targetType))
                 {
-                    returnValue = value;
+                    returnValue = Convert.ChangeType(value, targetType);
+                }
+                if (targetType.Equals(typeof(Guid)))
+                {
+                    returnValue = Guid.Parse(value.ToString());
                 }
             }
             else
