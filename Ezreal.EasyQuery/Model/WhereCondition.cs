@@ -33,7 +33,6 @@ namespace Ezreal.EasyQuery.Model
         private static readonly MethodInfo _stringStartsWithMethod = typeof(string).GetMethod(nameof(string.StartsWith), new Type[] { typeof(string) });
         private static readonly MethodInfo _stringEndsWithMethod = typeof(string).GetMethod(nameof(string.EndsWith), new Type[] { typeof(string) });
         private static readonly MethodInfo _stringToLowerMethod = typeof(string).GetMethod(nameof(string.ToLower), new Type[] { });
-
         private static readonly MethodInfo _enumerableContainsMethod = typeof(Enumerable).GetMethods().FirstOrDefault(m => m.IsGenericMethod && m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
 
         public WhereCondition(string columnName, object columnValue, EnumMatchMode matchMode)
