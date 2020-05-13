@@ -25,13 +25,13 @@ namespace Ezreal.EasyQuery.Model
                 throw new ArgumentNullException(nameof(queryable));
             }
             ParameterExpression parameter = Expression.Parameter(typeof(TDBOSource), "s");
-            bool IsOrdered = false;
+         
             this.ForEach(order =>
             {
                 MemberExpression member = Expression.PropertyOrField(parameter, order.ColumnName);
                 Type funcType = typeof(Func<,>).MakeGenericType(typeof(TDBOSource), member.Type);
                 string queryableExpressionString = queryable.Expression.ToString();
-                if (IsOrdered && (queryableExpressionString.Contains(nameof(Queryable.OrderBy)) || queryableExpressionString.Contains(nameof(Queryable.OrderByDescending))))
+                if (queryableExpressionString.Contains(nameof(Queryable.OrderBy)) || queryableExpressionString.Contains(nameof(Queryable.OrderByDescending)))
                 {
                     IOrderedQueryable<TDBOSource> orderedQueryable = queryable as IOrderedQueryable<TDBOSource>;
                     if (order.OrderMode == EnumOrderMode.Asc)
@@ -57,7 +57,7 @@ namespace Ezreal.EasyQuery.Model
                     {
                         MethodInfo method = _orderByDescendingMethod.MakeGenericMethod(typeof(TDBOSource), member.Type);
                         queryable = method.Invoke(null, new object[] { queryable, Expression.Lambda(funcType, member, parameter) }) as IOrderedQueryable<TDBOSource>;
-                    }
+                    }                
                 }
             });
 
