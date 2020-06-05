@@ -2,6 +2,7 @@ using Ezreal.EasyQuery.Enums;
 using Ezreal.Extension.Core;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,7 +19,16 @@ namespace Ezreal.EasyQuery.Model
         /// </summary>
         public string ColumnName { get; set; }
         /// <summary>
-        /// 搜索值
+        /// 搜索值【简单类型值无需处理，序列化传递时以Json字符串序列化】
+        /// <para>
+        /// <see cref="EnumMatchMode.Between"/>和<see cref="EnumMatchMode.NotBetween"/>需要传递一个2元素的数组[Start,End] 以Json序列化的方式处理
+        /// </para>
+        /// <para>
+        /// <see cref="EnumMatchMode.In"/>和<see cref="EnumMatchMode.NotIn"/>需要传递一个N元素的数组[item1,item2...itemN] 以Json序列化的方式处理
+        /// </para>
+        /// <para>
+        /// *以Json序列化搜索值，以适应特殊字符
+        /// </para>
         /// </summary>
         public object ColumnValue { get; set; }
         /// <summary>
@@ -53,6 +63,7 @@ namespace Ezreal.EasyQuery.Model
         /// <returns></returns>
         public virtual Expression GetExpression<TSource>(ParameterExpression parameter)
         {
+
             MemberExpression member = Expression.PropertyOrField(parameter, this.ColumnName);
             if (member.Type.IsGenericType && member.Type.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
             {
@@ -63,17 +74,17 @@ namespace Ezreal.EasyQuery.Model
             }
             if (this.MatchMode == EnumMatchMode.Equal)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
                 return Expression.Equal(member, constant);
             }
             if (this.MatchMode == EnumMatchMode.NotEqual)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
                 return Expression.NotEqual(member, constant);
             }
             if (this.MatchMode == EnumMatchMode.Like)
             {
-                ConstantExpression constant = Expression.Constant(this.ColumnValue.ToString());
+                Expression constant = ConstantExpression(this.ColumnValue.ToString());
                 Expression currentExpression = member.Type == typeof(string) ? (Expression)member : Expression.Call(member, _objectToStringMethod);
                 currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
                 currentExpression = Expression.Call(currentExpression, _stringContainsMethod, Expression.Call(constant, _stringToLowerMethod));
@@ -82,7 +93,7 @@ namespace Ezreal.EasyQuery.Model
             }
             if (this.MatchMode == EnumMatchMode.NotLike)
             {
-                ConstantExpression constant = Expression.Constant(this.ColumnValue.ToString());
+                Expression constant = ConstantExpression(this.ColumnValue.ToString());
                 Expression currentExpression = member.Type == typeof(string) ? (Expression)member : Expression.Call(member, _objectToStringMethod);
                 currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
                 currentExpression = Expression.Call(currentExpression, _stringContainsMethod, Expression.Call(constant, _stringToLowerMethod));
@@ -92,24 +103,24 @@ namespace Ezreal.EasyQuery.Model
             }
             if (this.MatchMode == EnumMatchMode.Less)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
                 return Expression.LessThan(member, constant);
 
             }
             if (this.MatchMode == EnumMatchMode.LessOrEqual)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
                 return Expression.LessThanOrEqual(member, constant);
             }
             if (this.MatchMode == EnumMatchMode.More)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
                 return Expression.GreaterThan(member, constant);
 
             }
             if (this.MatchMode == EnumMatchMode.MoreOrEqual)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
                 return Expression.GreaterThanOrEqual(member, constant);
             }
 
@@ -118,50 +129,67 @@ namespace Ezreal.EasyQuery.Model
             {
 
                 object[] valueArray = this.ColumnValue as object[];
-                ConstantExpression constantStart = Expression.Constant(ChangeValueTypeToMemberType(member.Type, valueArray[0]));
-                ConstantExpression constantEnd = Expression.Constant(ChangeValueTypeToMemberType(member.Type, valueArray[1]));
-                return Expression.And(Expression.GreaterThanOrEqual(member, constantStart), Expression.LessThanOrEqual(member, constantEnd));
+                Expression constantStart = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[0]));
+                Expression constantEnd = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[1]));
+                return Expression.AndAlso(Expression.GreaterThanOrEqual(member, constantStart), Expression.LessThanOrEqual(member, constantEnd));
 
             }
             if (this.MatchMode == EnumMatchMode.NotBetween)
-            {                
+            {
                 object[] valueArray = this.ColumnValue as object[];
-                ConstantExpression constantStart = Expression.Constant(ChangeValueTypeToMemberType(member.Type, valueArray[0]));
-                ConstantExpression constantEnd = Expression.Constant(ChangeValueTypeToMemberType(member.Type, valueArray[1]));
-                return Expression.And(Expression.LessThan(member, constantStart), Expression.GreaterThan(member, constantEnd));
+                Expression constantStart = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[0]));
+                Expression constantEnd = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[1]));
+                return Expression.AndAlso(Expression.LessThan(member, constantStart), Expression.GreaterThan(member, constantEnd));
 
             }
             if (this.MatchMode == EnumMatchMode.In)
             {
-                Type listType = typeof(List<>).MakeGenericType(member.Type);
-                MethodInfo _listAddMethod = listType.GetMethod("Add");
-                object list = Activator.CreateInstance(listType);
-                foreach (var item in this.ColumnValue as Array)
+                //Type listType = typeof(List<>).MakeGenericType(member.Type);
+                //MethodInfo _listAddMethod = listType.GetMethod("Add");
+                //object list = Activator.CreateInstance(listType);
+                //foreach (object item in this.ColumnValue as IEnumerable)
+                //{
+                //    _listAddMethod.Invoke(list, new[] { ChangeValueTypeToMemberType(member.Type, item) });
+                //}
+                //Expression constant = ConstantExpression(list);
+                //MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(member.Type);
+                //return Expression.Call(null, containsMethod, constant, member);
+                Expression orEqualsExpression = null;
+                foreach (object item in this.ColumnValue as IEnumerable)
                 {
-                    _listAddMethod.Invoke(list, new[] { ChangeValueTypeToMemberType(member.Type, item) });
+                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, item));
+                    orEqualsExpression = orEqualsExpression.IsNull()
+                        ? Expression.Equal(member, constant)
+                        : Expression.OrElse(orEqualsExpression, Expression.Equal(member, constant));
                 }
-                ConstantExpression constant = Expression.Constant(list);
-                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(member.Type);
-                return Expression.Call(null, containsMethod, constant, member);
-
+                return orEqualsExpression;
             }
             if (this.MatchMode == EnumMatchMode.NotIn)
             {
-                Type listType = typeof(List<>).MakeGenericType(member.Type);
-                MethodInfo _listAddMethod = listType.GetMethod("Add");
-                object list = Activator.CreateInstance(listType);
-                foreach (var item in this.ColumnValue as Array)
+                //Type listType = typeof(List<>).MakeGenericType(member.Type);
+                //MethodInfo _listAddMethod = listType.GetMethod("Add");
+                //object list = Activator.CreateInstance(listType);
+                //foreach (var item in this.ColumnValue as IEnumerable)
+                //{
+                //    _listAddMethod.Invoke(list, new[] { ChangeValueTypeToMemberType(member.Type, item) });
+                //}
+                //Expression constant = ConstantExpression(list);
+                //MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(member.Type);
+                //return Expression.Not(Expression.Call(null, containsMethod, Expression.TypeAs(constant, typeof(IEnumerable<>).MakeGenericType(member.Type)), member));
+                Expression andNotEqualsExpression = null;
+                foreach (object item in this.ColumnValue as IEnumerable)
                 {
-                    _listAddMethod.Invoke(list, new[] { ChangeValueTypeToMemberType(member.Type, item) });
+                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, item));
+                    andNotEqualsExpression = andNotEqualsExpression.IsNull() ?
+                        Expression.NotEqual(member, constant)
+                        : Expression.AndAlso(andNotEqualsExpression, Expression.NotEqual(member, constant));
                 }
-                ConstantExpression constant = Expression.Constant(list);
-                MethodInfo containsMethod = _enumerableContainsMethod.MakeGenericMethod(member.Type);
-                return Expression.Not(Expression.Call(null, containsMethod, Expression.TypeAs(constant, typeof(IEnumerable<>).MakeGenericType(member.Type)), member));
+                return andNotEqualsExpression;
 
             }
             if (this.MatchMode == EnumMatchMode.StartWith)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
 
                 return AttachNotNullCheckExpression(member, Expression.Call(Expression.Call(member, _objectToStringMethod), _stringStartsWithMethod, constant));
 
@@ -169,7 +197,7 @@ namespace Ezreal.EasyQuery.Model
 
             if (this.MatchMode == EnumMatchMode.EndWith)
             {
-                ConstantExpression constant = Expression.Constant(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, this.ColumnValue));
 
                 return AttachNotNullCheckExpression(member, Expression.Call(Expression.Call(member, _objectToStringMethod), _stringEndsWithMethod, constant));
 
@@ -219,8 +247,6 @@ namespace Ezreal.EasyQuery.Model
                 }
             }
             else
-
-            //if (!(targetType.IsGenericType && targetType.GetGenericTypeDefinition().Equals(typeof(Nullable<>))))
             {
                 if (typeof(IConvertible).IsAssignableFrom(targetType))
                 {
@@ -232,6 +258,68 @@ namespace Ezreal.EasyQuery.Model
                 }
             }
             return returnValue;
+        }
+
+
+        /// <summary>
+        /// 生成常量表达式
+        /// 使用属性访问表达式替代常量访问
+        /// </summary>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns></returns>
+        protected virtual Expression ConstantExpression(object value)
+        {
+            Type targetType = value.GetType();
+            if (targetType == null)
+            {
+                throw new ArgumentNullException(nameof(targetType));
+            }
+
+            if (value == null)
+            {
+                return Expression.Constant(value, targetType);
+            }
+
+            if (targetType == typeof(string))
+            {
+                var constantString = Expression.Constant(new ConstantString(value));
+                return Expression.Property(constantString, nameof(ConstantString.Value));
+            }
+            else
+            {
+                var expression = (Expression)Expression.Constant(value);
+                return value.GetType() == targetType ? expression : Expression.Convert(expression, targetType);
+            }
+        }
+
+        /// <summary>
+        /// 表示文本常量
+        /// </summary>
+        private class ConstantString
+        {
+            /// <summary>
+            /// 获取常量值
+            /// </summary>
+            public string Value { get; }
+
+            /// <summary>
+            /// 文本常量
+            /// </summary>
+            /// <param name="value">常量值</param>
+            public ConstantString(object value)
+            {
+                this.Value = value?.ToString();
+            }
+
+            /// <summary>
+            /// 转换为字符串
+            /// </summary>
+            /// <returns></returns>
+            public override string ToString()
+            {
+                return $@"""{this.Value}""";
+            }
         }
 
     }

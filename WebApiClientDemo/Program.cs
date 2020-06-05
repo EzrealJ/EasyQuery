@@ -1,5 +1,6 @@
 ﻿using AspNetCoreDemo.Models;
 using Ezreal.EasyQuery.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,11 @@ namespace WebApiClientDemo
     {
         static void Main(string[] args)
         {
+            string[] a = new string[] { "ss", "yyy" };
+            string[] b = new string[] { "ssa", "y,yy", "111" };
+            string value1 = JsonConvert.SerializeObject(a);
+            string value2 = JsonConvert.SerializeObject(b);
+            Console.WriteLine();
             //Thread.Sleep(10 * 1000);
             //while (true)
             //{
@@ -41,7 +47,7 @@ namespace WebApiClientDemo
 
 
             Expression<Func<User, bool>> func = u => u.Age > 10 && u.Id == Guid.Empty && (u.Name.Contains("王") || u.Name.Contains("李"));
-            var b = func.Body;
+            var x = func.Body;
             GetWhereConditionArguments<User>(func.Body as BinaryExpression);
             Console.ReadKey();
         }
@@ -66,7 +72,7 @@ namespace WebApiClientDemo
             };
             do
             {
-                
+
                 Expression currentRight = (currentLeft as BinaryExpression)?.Right ?? currentLeft;
                 if (currentRight.NodeType == ExpressionType.AndAlso || currentRight.NodeType == ExpressionType.OrElse)
                 {
@@ -85,7 +91,7 @@ namespace WebApiClientDemo
                         whereCondition.ColumnName = member.Member.Name;
                         whereCondition.ColumnValue = methodCallExpression.Arguments.FirstOrDefault().ToString();
                     }
-                    
+
                 }
                 else
                 {

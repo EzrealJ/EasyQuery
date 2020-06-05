@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreDemo", "AspNetCor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiClientDemo", "WebApiClientDemo\WebApiClientDemo.csproj", "{802FA59C-0EEF-48EF-8586-60CE070AF0D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ezreal.EasyQuery.Test", "Ezreal.EasyQuery.Test\Ezreal.EasyQuery.Test.csproj", "{F2F14084-55A1-4EE7-9AD7-1BAECDEB8D0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ezreal.EasyQuery.Test", "Ezreal.EasyQuery.Test\Ezreal.EasyQuery.Test.csproj", "{F2F14084-55A1-4EE7-9AD7-1BAECDEB8D0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ezreal.EasyQuery.Benchmark", "Ezreal.EasyQuery.Benchmark\Ezreal.EasyQuery.Benchmark.csproj", "{771227E6-D731-40DC-BF02-C8F503EC544A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{F2F14084-55A1-4EE7-9AD7-1BAECDEB8D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2F14084-55A1-4EE7-9AD7-1BAECDEB8D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2F14084-55A1-4EE7-9AD7-1BAECDEB8D0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{771227E6-D731-40DC-BF02-C8F503EC544A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{771227E6-D731-40DC-BF02-C8F503EC544A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{771227E6-D731-40DC-BF02-C8F503EC544A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{771227E6-D731-40DC-BF02-C8F503EC544A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,17 +1,19 @@
-﻿using Ezreal.EasyQuery.Attributes;
+﻿using BenchmarkDotNet.Attributes;
+using Ezreal.EasyQuery.Attributes;
 using Ezreal.EasyQuery.Interpret;
 using Ezreal.EasyQuery.Model;
+using Ezreal.EasyQuery.Test;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Xunit;
 
-namespace Ezreal.EasyQuery.Test
+namespace Ezreal.EasyQuery.Benchmark
 {
+    [RPlotExporter, RankColumn]
     public class WhereConditionArgumentsInterpret_Test
     {
-        [Fact]
+        [Benchmark]
         public void GetWhereExpressionTest()
         {
             WhereConditionArguments<TestClassA> whereConditionArguments = new WhereConditionArguments<TestClassA>();
@@ -31,8 +33,7 @@ namespace Ezreal.EasyQuery.Test
 
             List<WhereConditionFilterAttribute> whereConditionFilterAttributes = new List<WhereConditionFilterAttribute>();
             whereConditionFilterAttributes.Add(new WhereConditionFilterAttribute(Enums.EnumMatchMode.All, nameof(TestClassA.A), nameof(TestClassA.B)));
-            //whereConditionFilterAttributes.Add(new WhereConditionFilterAttribute(Enums.EnumMatchMode.Equal, "DDDDD"));
-            //whereConditionFilterAttributes.Add(new WhereConditionFilterAttribute(Enums.EnumMatchMode.In, nameof(TestClassA.A)));
+
 
             WhereConditionArgumentsInterpret whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpret();
             var a = whereConditionArgumentsInterpret.CheckConstraint(whereConditionArguments, whereConditionFilterAttributes);
