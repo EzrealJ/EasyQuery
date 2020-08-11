@@ -237,14 +237,7 @@ namespace Ezreal.EasyQuery.Model
                 {
                     targetType = targetType.GenericTypeArguments[0];
                 }
-                if (typeof(IConvertible).IsAssignableFrom(targetType))
-                {
-                    returnValue = Convert.ChangeType(value, targetType);
-                }
-                if (targetType.Equals(typeof(Guid)))
-                {
-                    returnValue = Guid.Parse(value.ToString());
-                }
+                returnValue = ChangeValueTypeToMemberType(targetType, (value as string) ?? value.ToString());
             }
             else
             {
@@ -254,7 +247,11 @@ namespace Ezreal.EasyQuery.Model
                 }
                 if (targetType.Equals(typeof(Guid)))
                 {
-                    returnValue = Guid.Parse(value.ToString());
+                    returnValue = Guid.Parse((value as string) ?? value.ToString());
+                }
+                if (targetType.Equals(typeof(TimeSpan)))
+                {
+                    returnValue = TimeSpan.Parse((value as string) ?? value.ToString());
                 }
             }
             return returnValue;
