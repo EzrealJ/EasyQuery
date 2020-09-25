@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using System.Linq;
 
-namespace Ezreal.EasyQuery.Model
+namespace Ezreal.EasyQuery.Models
 {
     public class OrderConditionArguments<TSource> : OrderConditionArguments
     {

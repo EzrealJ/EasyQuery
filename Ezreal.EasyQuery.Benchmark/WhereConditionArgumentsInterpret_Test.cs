@@ -1,12 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Ezreal.EasyQuery.Attributes;
-using Ezreal.EasyQuery.Interpret;
-using Ezreal.EasyQuery.Model;
 using Ezreal.EasyQuery.Test;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Ezreal.EasyQuery.Models;
+using Ezreal.EasyQuery.Interpreters;
 
 namespace Ezreal.EasyQuery.Benchmark
 {
@@ -35,7 +35,7 @@ namespace Ezreal.EasyQuery.Benchmark
             whereConditionFilterAttributes.Add(new WhereConditionFilterAttribute(Enums.EnumMatchMode.All, nameof(TestClassA.A), nameof(TestClassA.B)));
 
 
-            WhereConditionArgumentsInterpret whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpret();
+            var whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpreter();
             var a = whereConditionArgumentsInterpret.CheckConstraint(whereConditionArguments, whereConditionFilterAttributes);
 
 

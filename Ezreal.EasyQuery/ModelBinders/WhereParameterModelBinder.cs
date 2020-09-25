@@ -1,16 +1,16 @@
 #if NETSTANDARD2_0
-using Ezreal.EasyQuery.Attributes;
-using Ezreal.EasyQuery.Interpret;
-using Ezreal.EasyQuery.Model;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Ezreal.EasyQuery.Attributes;
+using Ezreal.EasyQuery.Interpreters;
+using Ezreal.EasyQuery.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Newtonsoft.Json;
 
-namespace Ezreal.EasyQuery.ModelBinder
+namespace Ezreal.EasyQuery.ModelBinders
 {
     public class WhereConditionModelBinder : IModelBinder
     {
@@ -25,25 +25,25 @@ namespace Ezreal.EasyQuery.ModelBinder
             {
                 modelName = bindingContext.ModelMetadata.Name;
             }
-            ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
+            var valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
             if (valueProviderResult == ValueProviderResult.None)
             {
                 await Task.CompletedTask;
                 return;
             }
             bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
-            string requestString = valueProviderResult.FirstValue;
+            var requestString = valueProviderResult.FirstValue;
             if (string.IsNullOrEmpty(requestString))
             {
                 await Task.CompletedTask;
                 return;
             }
-            WhereConditionArguments whereParameterArguments = JsonConvert.DeserializeObject(requestString, bindingContext.ModelType) as WhereConditionArguments;
+            var whereParameterArguments = JsonConvert.DeserializeObject(requestString, bindingContext.ModelType) as WhereConditionArguments;
             try
             {
-                IEnumerable<WhereConditionFilterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
+                var whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
                     .Where(attr => attr.GetType() == typeof(WhereConditionFilterAttribute)).Select(attr => attr as WhereConditionFilterAttribute);
-                var whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpret();
+                var whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpreter();
                 whereParameterArguments = whereConditionArgumentsInterpret.CheckConstraint(whereParameterArguments, whereParameterAttributes?.ToList());
                 whereParameterArguments = whereConditionArgumentsInterpret.Parse(whereParameterArguments);
 

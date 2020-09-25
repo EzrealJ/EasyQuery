@@ -1,20 +1,17 @@
-﻿using Ezreal.EasyQuery.Enums;
-using Ezreal.Extension.Core;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
+using Ezreal.EasyQuery.Enums;
 
-namespace Ezreal.EasyQuery.Model
+namespace Ezreal.EasyQuery.Models
 {
-    public class WhereConditionArguments 
+    public class WhereConditionArguments
     {
         /// <summary>
         /// 内部组合条件的集合
         /// </summary>
-        public List<WhereConditionArguments> InnerWhereConditionArguments { get; set; } = new List<WhereConditionArguments>();
+        public List<WhereConditionArguments> InnerWhereConditionArguments { get; set; } =
+            new List<WhereConditionArguments>();
+
         /// <summary>
         /// 平铺条件的集合
         /// </summary>
@@ -31,32 +28,36 @@ namespace Ezreal.EasyQuery.Model
 
         public Expression GetExpression<TSource>(ParameterExpression parameter)
         {
-            if (this.WhereConditions.IsNullOrNoItems() && this.InnerWhereConditionArguments.IsNullOrNoItems())
+            if (this.WhereConditions == null && this.InnerWhereConditionArguments == null)
             {
                 return null;
             }
+
             Expression where = null;
 
-            foreach (var item in this.WhereConditions)
+            if (this.WhereConditions != null)
             {
-                if (item is WhereCondition condition)
+                foreach (var item in this.WhereConditions)
                 {
-                    where = SpliceExpression(where, condition.GetExpression<TSource>(parameter));
+                    if (item is WhereCondition condition)
+                    {
+                        where = SpliceExpression(where, condition.GetExpression<TSource>(parameter));
+                    }
                 }
             }
-
+ 
             foreach (var item in this.InnerWhereConditionArguments)
             {
                 if (item is WhereConditionArguments conditionArguments)
                 {
-                    Expression right = conditionArguments.GetExpression<TSource>(parameter);
+                    var right = conditionArguments.GetExpression<TSource>(parameter);
                     if (right != null)
                     {
                         where = SpliceExpression(where, right);
-                    }                    
-                   
+                    }
                 }
             }
+
             return where;
         }
 
@@ -67,15 +68,7 @@ namespace Ezreal.EasyQuery.Model
                 return right;
             }
 
-            if (this.SpliceMode == EnumSpliceMode.AndAlso)
-            {
-                return Expression.AndAlso(left, right);
-            }
-            else
-            {
-                return Expression.OrElse(left, right);
-            }
+            return this.SpliceMode == EnumSpliceMode.AndAlso ? Expression.AndAlso(left, right) : Expression.OrElse(left, right);
         }
-
     }
 }

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AspNetCoreDemo.Models;
 using Ezreal.EasyQuery.Attributes;
-using Ezreal.EasyQuery.Model;
 using Microsoft.AspNetCore.Mvc;
 using Ezreal.EasyQuery.Enums;
+using Ezreal.EasyQuery.Models;
 
 namespace AspNetCoreDemo.Controllers
 {

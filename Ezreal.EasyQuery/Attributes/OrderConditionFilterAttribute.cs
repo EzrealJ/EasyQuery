@@ -1,5 +1,4 @@
 ﻿using Ezreal.EasyQuery.Enums;
-using Ezreal.EasyQuery.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +13,9 @@ namespace Ezreal.EasyQuery.Attributes
             this.AllowOrderMode = pattern;
             this.ColumnName = columnName;
         }
-
+        /// <summary>
+        /// 允许的排序模式
+        /// </summary>
         public EnumOrderMode AllowOrderMode { get; }
         public string[] ColumnName { get; }
     }

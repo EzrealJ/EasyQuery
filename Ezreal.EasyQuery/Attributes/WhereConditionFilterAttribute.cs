@@ -24,11 +24,11 @@ namespace Ezreal.EasyQuery.Attributes
         /// <summary>
         /// 搜索列
         /// </summary>
-        public virtual IEnumerable<string> ColumnName { get; set; }
+        public virtual IEnumerable<string> ColumnName { get; }
         /// <summary>
         /// 匹配方式
         /// </summary>
-        public virtual EnumMatchMode AllowEnumMatchPattern { get; private set; }
+        public virtual EnumMatchMode AllowEnumMatchPattern { get; }
 
 
     }

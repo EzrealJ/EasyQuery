@@ -1,7 +1,7 @@
-﻿using Ezreal.EasyQuery.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Ezreal.EasyQuery.Models;
 using Xunit;
 
 namespace Ezreal.EasyQuery.Test

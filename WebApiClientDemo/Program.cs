@@ -1,11 +1,11 @@
 ﻿using AspNetCoreDemo.Models;
-using Ezreal.EasyQuery.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
+using Ezreal.EasyQuery.Models;
 using WebApiClient;
 
 namespace WebApiClientDemo

@@ -1,6 +1,6 @@
 ﻿using AspNetCoreDemo.Models;
-using Ezreal.EasyQuery.Model;
 using System.Collections.Generic;
+using Ezreal.EasyQuery.Models;
 using WebApiClient;
 using WebApiClient.Attributes;
 

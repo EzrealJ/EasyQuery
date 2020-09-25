@@ -1,9 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Ezreal.EasyQuery.Model;
 using Ezreal.EasyQuery.Test;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Ezreal.EasyQuery.Models;
 
 namespace Ezreal.EasyQuery.Benchmark
 {

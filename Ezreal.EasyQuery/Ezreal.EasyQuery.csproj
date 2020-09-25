@@ -9,18 +9,15 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Version>0.3.13</Version>
-    <PackageLicenseUrl>https://github.com/EzrealJ/EasyQuery/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Ezreal</Authors>
     <Description>https://github.com/EzrealJ/EasyQuery</Description>
     <Copyright>Ezreal</Copyright>
-    <PackageProjectUrl>https://github.com/EzrealJ/EasyQuery/blob/master/LICENSE</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/EzrealJ/EasyQuery/blob/master/LICENSE</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/EzrealJ/EasyQuery</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/EzrealJ/EasyQuery</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ezreal.Extension.Core" Version="0.1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
 

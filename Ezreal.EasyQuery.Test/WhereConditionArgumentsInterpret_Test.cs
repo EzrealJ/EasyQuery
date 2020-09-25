@@ -1,10 +1,8 @@
 ﻿using Ezreal.EasyQuery.Attributes;
-using Ezreal.EasyQuery.Interpret;
-using Ezreal.EasyQuery.Model;
+using Ezreal.EasyQuery.Interpreters;
+using Ezreal.EasyQuery.Models;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Ezreal.EasyQuery.Test
@@ -34,7 +32,7 @@ namespace Ezreal.EasyQuery.Test
             //whereConditionFilterAttributes.Add(new WhereConditionFilterAttribute(Enums.EnumMatchMode.Equal, "DDDDD"));
             //whereConditionFilterAttributes.Add(new WhereConditionFilterAttribute(Enums.EnumMatchMode.In, nameof(TestClassA.A)));
 
-            WhereConditionArgumentsInterpret whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpret();
+            var whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpreter();
             var a = whereConditionArgumentsInterpret.CheckConstraint(whereConditionArguments, whereConditionFilterAttributes);
 
 

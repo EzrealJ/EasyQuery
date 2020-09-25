@@ -1,9 +1,9 @@
 ﻿#if NETSTANDARD2_0
-using Ezreal.EasyQuery.ModelBinderProvider;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Ezreal.EasyQuery.ModelBinderProviders;
 
 namespace Ezreal.EasyQuery
 {
