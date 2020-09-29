@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ezreal.EasyQuery.Enums;
+using Ezreal.EasyQuery.Extensions;
 
 namespace Ezreal.EasyQuery.Models
 {
@@ -39,13 +40,13 @@ namespace Ezreal.EasyQuery.Models
             typeof(object).GetMethod(nameof(ToString), new Type[] { });
 
         private static readonly MethodInfo _stringContainsMethod =
-            typeof(string).GetMethod(nameof(string.Contains), new Type[] {typeof(string)});
+            typeof(string).GetMethod(nameof(string.Contains), new Type[] { typeof(string) });
 
         private static readonly MethodInfo _stringStartsWithMethod =
-            typeof(string).GetMethod(nameof(string.StartsWith), new Type[] {typeof(string)});
+            typeof(string).GetMethod(nameof(string.StartsWith), new Type[] { typeof(string) });
 
         private static readonly MethodInfo _stringEndsWithMethod =
-            typeof(string).GetMethod(nameof(string.EndsWith), new Type[] {typeof(string)});
+            typeof(string).GetMethod(nameof(string.EndsWith), new Type[] { typeof(string) });
 
         private static readonly MethodInfo _stringToLowerMethod =
             typeof(string).GetMethod(nameof(string.ToLower), new Type[] { });
@@ -72,154 +73,66 @@ namespace Ezreal.EasyQuery.Models
         /// <returns></returns>
         public virtual Expression GetExpression<TSource>(ParameterExpression parameter)
         {
-            MemberExpression member = Expression.PropertyOrField(parameter, Key);
-            if (member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                if (Value != null)
-                {
-                    member = Expression.Property(member, "Value");
-                }
-            }
+            MemberExpression memberAccessor = Expression.PropertyOrField(parameter, Key);
+
 
             switch (MatchMode)
             {
                 case EnumMatchMode.Equal:
                 {
-                    //member==constant
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-                    return Expression.Equal(member, constant);
+                    return GetEqualExpression(memberAccessor, Value);
                 }
                 case EnumMatchMode.NotEqual:
                 {
-                    //member!=constant
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-                    return Expression.NotEqual(member, constant);
+                    return GetNotEqualExpression(memberAccessor, Value);
                 }
                 case EnumMatchMode.Like:
                 {
-                    //member.ToString().ToLower().Contains(constant.ToString().ToLower())
-                    Expression constant = ConstantExpression(Value?.ToString());
-                    Expression currentExpression = member.Type == typeof(string)
-                        ? (Expression) member
-                        : Expression.Call(member, _objectToStringMethod);
-                    currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
-                    currentExpression = Expression.Call(currentExpression, _stringContainsMethod,
-                        Expression.Call(constant, _stringToLowerMethod));
-                    return AttachNotNullCheckExpression(member, currentExpression);
+                    return GetLikeExpression(memberAccessor, Value?.ToString());
                 }
                 case EnumMatchMode.NotLike:
                 {
-                    //!member.ToString().ToLower().Contains(constant.ToString().ToLower())
-                    Expression constant = ConstantExpression(Value?.ToString());
-                    Expression currentExpression = member.Type == typeof(string)
-                        ? (Expression) member
-                        : Expression.Call(member, _objectToStringMethod);
-                    currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
-                    currentExpression = Expression.Call(currentExpression, _stringContainsMethod,
-                        Expression.Call(constant, _stringToLowerMethod));
-                    currentExpression = Expression.Not(currentExpression);
-                    return AttachNotNullCheckExpression(member, currentExpression);
+                    return GetNotLikeExpression(memberAccessor, Value?.ToString());
                 }
-                case EnumMatchMode.Less:
+                case EnumMatchMode.LessThan:
                 {
-                    //member<constant
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-                    return Expression.LessThan(member, constant);
+                    return GetLessThanExpression(memberAccessor, Value);
                 }
-                case EnumMatchMode.LessOrEqual:
+                case EnumMatchMode.LessThanOrEqual:
                 {
-                    //member<=constant
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-                    return Expression.LessThanOrEqual(member, constant);
+                    return GetLessThanOrEqualExpression(memberAccessor, Value);
                 }
-                case EnumMatchMode.More:
+                case EnumMatchMode.GreaterThan:
                 {
-                    //member>constant
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-                    return Expression.GreaterThan(member, constant);
+                    return GetGreaterThanExpression(memberAccessor, Value);
                 }
-                case EnumMatchMode.MoreOrEqual:
+                case EnumMatchMode.GreaterThanOrEqual:
                 {
-                    //member>=constant
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-                    return Expression.GreaterThanOrEqual(member, constant);
+                    return GetGreaterThanOrEqualExpression(memberAccessor, Value);
                 }
                 case EnumMatchMode.Between:
                 {
-                    //member>=constant[0]&&member<=constant[1]
-                    if (Value is object[] valueArray)
-                    {
-                        Expression constantStart = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[0]));
-                        Expression constantEnd = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[1]));
-                        return Expression.AndAlso(Expression.GreaterThanOrEqual(member, constantStart),
-                            Expression.LessThanOrEqual(member, constantEnd));
-                    }
-
-                    return null;
+                    return GetBetweenExpression(memberAccessor, Value);
                 }
                 case EnumMatchMode.NotBetween:
                 {
-                    //member<=constant[0]&&member>=constant[1]
-                    if (Value is object[] valueArray)
-                    {
-                        Expression constantStart = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[0]));
-                        Expression constantEnd = ConstantExpression(ChangeValueTypeToMemberType(member.Type, valueArray[1]));
-                        return Expression.AndAlso(Expression.LessThan(member, constantStart),
-                            Expression.GreaterThan(member, constantEnd));
-                    }
-                    return null;
+                    return GetNotBetweenExpression(memberAccessor, Value);
                 }
                 case EnumMatchMode.In:
                 {
-                    Expression orEqualsExpression = null;
-                    if (Value == null)
-                    {
-                        return orEqualsExpression;
-                    }
-
-                    foreach (object item in (IEnumerable)Value)
-                    {
-                        Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, item));
-                        orEqualsExpression = orEqualsExpression == null
-                            ? Expression.Equal(member, constant)
-                            : Expression.OrElse(orEqualsExpression, Expression.Equal(member, constant));
-                    }
-
-                    return orEqualsExpression;
+                    return GetInExpression(memberAccessor, Value);
                 }
                 case EnumMatchMode.NotIn:
                 {
-                    Expression andNotEqualsExpression = null;
-                    if (Value == null)
-                    {
-                        return andNotEqualsExpression;
-                    }
-
-                    foreach (object item in (IEnumerable)Value)
-                    {
-                        Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, item));
-                        andNotEqualsExpression = andNotEqualsExpression == null
-                            ? Expression.NotEqual(member, constant)
-                            : Expression.AndAlso(andNotEqualsExpression, Expression.NotEqual(member, constant));
-                    }
-
-                    return andNotEqualsExpression;
+                    return GetNotInExpression(memberAccessor, Value);
                 }
                 case EnumMatchMode.StartWith:
                 {
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-
-                    return AttachNotNullCheckExpression(member,
-                        Expression.Call(Expression.Call(member, _objectToStringMethod), _stringStartsWithMethod,
-                            constant));
+                    return GetStartWithExpression(memberAccessor, Value?.ToString());
                 }
                 case EnumMatchMode.EndWith:
                 {
-                    Expression constant = ConstantExpression(ChangeValueTypeToMemberType(member.Type, Value));
-
-                    return AttachNotNullCheckExpression(member,
-                        Expression.Call(Expression.Call(member, _objectToStringMethod), _stringEndsWithMethod,
-                            constant));
+                    return GetEndWithExpression(memberAccessor, Value?.ToString());
                 }
                 case EnumMatchMode.All:
 
@@ -229,16 +142,290 @@ namespace Ezreal.EasyQuery.Models
         }
 
 
-        private static Expression AttachNotNullCheckExpression(MemberExpression nullCheckMember,
-            Expression attachExpression)
+
+
+        /// <summary>
+        /// memberAccessor==value
+        /// </summary>
+        /// <param name="memberAccessor"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual Expression GetEqualExpression(MemberExpression memberAccessor, object value)
         {
-            if (typeof(ValueType).IsAssignableFrom(nullCheckMember.Type))
+            Expression constant = ConstantExpression(ChangeValueTypeToMemberType(memberAccessor.Type, value));
+
+            MemberExpression nullableStructValueAccessor = memberAccessor.GetNullableStructValueAccessExpression();
+            if (nullableStructValueAccessor == null || (nullableStructValueAccessor != null && value == null))
             {
-                return attachExpression;
+                return Expression.Equal(memberAccessor, constant);
+            }
+            else
+            {
+                return Expression.Equal(nullableStructValueAccessor, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+            }
+        }
+        /// <summary>
+        /// memberAccessor!=value
+        /// </summary>
+        /// <param name="memberAccessor"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual Expression GetNotEqualExpression(MemberExpression memberAccessor, object value)
+        {
+            return Expression.Not(GetEqualExpression(memberAccessor, value));
+        }
+        /// <summary>
+        /// <para>
+        /// [ValueType]------>member.ToString().ToLower().Contains(constant.ToLower())
+        /// </para>
+        /// <para>
+        /// [NullableType]------>member!=null AndAlso member.ToString().ToLower().Contains(constant.ToLower())
+        /// </para>
+        /// <para>
+        /// [value is null or empty]------>null
+        /// </para>
+        /// </summary>
+        /// <param name="memberAccessor"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual Expression GetLikeExpression(MemberExpression memberAccessor, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException($"“{nameof(value)}”不能是 Null 或为空。", nameof(value));
             }
 
-            return Expression.AndAlso(Expression.NotEqual(nullCheckMember, Expression.Constant(null)),
-                attachExpression);
+            Expression constant = ConstantExpression(value);
+            Expression currentExpression = memberAccessor.Type == typeof(string)
+                ? (Expression)memberAccessor
+                : Expression.Call(memberAccessor, _objectToStringMethod);
+            currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
+            currentExpression = Expression.Call(currentExpression, _stringContainsMethod,
+                Expression.Call(constant, _stringToLowerMethod));
+            return currentExpression.AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+        }
+        /// <summary>
+        /// Expression.Not(<see cref="GetLikeExpression"/>)
+        /// </summary>
+        /// <param name="memberAccessor"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual Expression GetNotLikeExpression(MemberExpression memberAccessor, string value)
+        {
+
+
+            return Expression.Not(GetLikeExpression(memberAccessor, value));
+        }
+
+        protected virtual Expression GetLessThanExpression(MemberExpression memberAccessor, object value)
+        {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            //member<constant
+            Expression constant = ConstantExpression(ChangeValueTypeToMemberType(memberAccessor.Type, value));
+
+            MemberExpression nullableStructValueAccessor = memberAccessor.GetNullableStructValueAccessExpression();
+            if (nullableStructValueAccessor == null)
+            {
+                return Expression.LessThan(memberAccessor, constant);
+            }
+            else
+            {
+                return Expression.LessThan(nullableStructValueAccessor, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+            }
+
+        }
+
+        protected virtual Expression GetLessThanOrEqualExpression(MemberExpression memberAccessor, object value)
+        {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            //member<=constant
+            Expression constant = ConstantExpression(ChangeValueTypeToMemberType(memberAccessor.Type, value));
+            MemberExpression nullableStructValueAccessor = memberAccessor.GetNullableStructValueAccessExpression();
+            if (nullableStructValueAccessor == null)
+            {
+                return Expression.LessThanOrEqual(memberAccessor, constant);
+            }
+            else
+            {
+                return Expression.LessThanOrEqual(nullableStructValueAccessor, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+            }
+        }
+
+        protected virtual Expression GetGreaterThanExpression(MemberExpression memberAccessor, object value)
+        {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            //member>constant
+            Expression constant = ConstantExpression(ChangeValueTypeToMemberType(memberAccessor.Type, value));
+            MemberExpression nullableStructValueAccessor = memberAccessor.GetNullableStructValueAccessExpression();
+            if (nullableStructValueAccessor == null)
+            {
+                return Expression.GreaterThan(memberAccessor, constant);
+            }
+            else
+            {
+                return Expression.GreaterThan(nullableStructValueAccessor, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+            }
+        }
+        protected virtual Expression GetGreaterThanOrEqualExpression(MemberExpression memberAccessor, object value)
+        {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            //member>=constant
+            Expression constant = ConstantExpression(ChangeValueTypeToMemberType(memberAccessor.Type, value));
+            MemberExpression nullableStructValueAccessor = memberAccessor.GetNullableStructValueAccessExpression();
+            if (nullableStructValueAccessor == null)
+            {
+                return Expression.GreaterThanOrEqual(memberAccessor, constant);
+            }
+            else
+            {
+                return Expression.GreaterThanOrEqual(nullableStructValueAccessor, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+            }
+        }
+
+
+        protected virtual Expression GetBetweenExpression(MemberExpression memberAccessor, object value)
+        {
+
+            //member>=constant[0]&&member<=constant[1]
+            if (value is object[] valueArray)
+            {
+
+                MemberExpression nullableStructValueAccessor = memberAccessor.GetNullableStructValueAccessExpression();
+                MemberExpression currentMemberAccessor = nullableStructValueAccessor != null ? nullableStructValueAccessor : memberAccessor;
+                Expression constantStart = ConstantExpression(ChangeValueTypeToMemberType(currentMemberAccessor.Type, valueArray[0]));
+                Expression constantEnd = ConstantExpression(ChangeValueTypeToMemberType(currentMemberAccessor.Type, valueArray[1]));
+                Expression result = Expression.AndAlso(
+                        Expression.GreaterThanOrEqual(currentMemberAccessor, constantStart),
+                        Expression.LessThanOrEqual(currentMemberAccessor, constantEnd)
+                        );
+                if (nullableStructValueAccessor != null)
+                {
+                    result = result.AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+                }
+                return result;
+            }
+            else
+            {
+                throw new ArgumentException(nameof(value) + " must be array which length==2", nameof(value));
+            }
+
+        }
+
+
+        protected virtual Expression GetNotBetweenExpression(MemberExpression memberAccessor, object value)
+        {
+            return Expression.Not(GetBetweenExpression(memberAccessor, value));
+        }
+
+        protected virtual Expression GetInExpression(MemberExpression memberAccessor, object value)
+        {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            Expression result = null;
+            MemberExpression nullableStructValueAccessor = memberAccessor.GetNullableStructValueAccessExpression();
+            MemberExpression currentMemberAccessor = nullableStructValueAccessor == null ? memberAccessor : nullableStructValueAccessor;
+            foreach (object item in (IEnumerable)value)
+            {
+                Expression constant = ConstantExpression(ChangeValueTypeToMemberType(memberAccessor.Type, item));
+                result = result == null
+                    ? Expression.Equal(currentMemberAccessor, constant)
+                    : Expression.OrElse(result, Expression.Equal(currentMemberAccessor, constant));
+            }
+            if (nullableStructValueAccessor != null)
+            {
+                result = result.AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+            }
+            return result;
+        }
+        protected virtual Expression GetNotInExpression(MemberExpression memberAccessor, object value)
+        {
+            return Expression.Not(GetInExpression(memberAccessor, value));
+        }
+
+        protected virtual Expression GetStartWithExpression(MemberExpression memberAccessor, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException($"“{nameof(value)}”不能是 Null 或为空。", nameof(value));
+            }
+
+            Expression constant = ConstantExpression(value);
+            Expression caller = memberAccessor.Type == typeof(string) ? (Expression)memberAccessor : Expression.Call(memberAccessor, _objectToStringMethod);
+
+            return
+                Expression.Call(caller, _stringStartsWithMethod, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+        }
+
+
+        protected virtual Expression GetEndWithExpression(MemberExpression memberAccessor, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException($"“{nameof(value)}”不能是 Null 或为空。", nameof(value));
+            }
+
+            Expression constant = ConstantExpression(value);
+            Expression caller = memberAccessor.Type == typeof(string) ? (Expression)memberAccessor : Expression.Call(memberAccessor, _objectToStringMethod);
+
+            return
+                Expression.Call(caller, _stringEndsWithMethod, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// 生成常量表达式
+        /// 当传入值是字符串时,使用<see cref="ConstantStringWrapper"/>包装替代常量访问
+        /// </summary>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns></returns>
+        protected virtual Expression ConstantExpression(object value)
+        {
+            if (value == null) return Expression.Constant(null);
+            Type targetType = value.GetType();
+
+            if (targetType == typeof(string))
+            {
+                ConstantExpression constantString = Expression.Constant(new ConstantStringWrapper(value));
+                return Expression.Property(constantString, nameof(ConstantStringWrapper.Value));
+            }
+            else
+            {
+                Expression expression = Expression.Constant(value);
+                return value.GetType() == targetType ? expression : Expression.Convert(expression, targetType);
+            }
         }
 
 
@@ -261,7 +448,7 @@ namespace Ezreal.EasyQuery.Models
             {
                 targetType = targetType.GenericTypeArguments[0];
 
-                returnValue = ChangeValueTypeToMemberType(targetType, (value as string) ?? value.ToString());
+                returnValue = ChangeValueTypeToMemberType(targetType, value);
             }
             else
             {
@@ -285,29 +472,7 @@ namespace Ezreal.EasyQuery.Models
         }
 
 
-        /// <summary>
-        /// 生成常量表达式
-        /// 使用属性访问表达式替代常量访问
-        /// </summary>
-        /// <param name="value"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <returns></returns>
-        protected virtual Expression ConstantExpression(object value)
-        {
-            if (value == null) return Expression.Constant(null);
-            Type targetType = value.GetType();
 
-            if (targetType == typeof(string))
-            {
-                ConstantExpression constantString = Expression.Constant(new ConstantStringWrapper(value));
-                return Expression.Property(constantString, nameof(ConstantStringWrapper.Value));
-            }
-            else
-            {
-                Expression expression = (Expression) Expression.Constant(value);
-                return value.GetType() == targetType ? expression : Expression.Convert(expression, targetType);
-            }
-        }
 
 
     }

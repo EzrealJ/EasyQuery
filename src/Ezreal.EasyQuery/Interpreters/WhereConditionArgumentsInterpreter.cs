@@ -3,6 +3,7 @@ using Ezreal.EasyQuery.Enums;
 using Ezreal.EasyQuery.Models;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -80,9 +81,9 @@ namespace Ezreal.EasyQuery.Interpreters
                     if (type == typeof(string))
                     {
                         targetList =
-                            JsonConvert.DeserializeObject<List<object>>(((string) whereCondition.Value)?.Trim());
+                            JsonConvert.DeserializeObject<List<object>>(((string)whereCondition.Value)?.Trim());
                     }
-                    else if (whereCondition.Value is System.Collections.IEnumerable array)
+                    else if (whereCondition.Value is IEnumerable array)
                     {
                         targetList = array.Cast<object>().ToList();
                     }
