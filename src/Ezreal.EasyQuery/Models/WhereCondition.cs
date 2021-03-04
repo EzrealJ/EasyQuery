@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Ezreal.EasyQuery.Enums;
 using Ezreal.EasyQuery.Extensions;
 
@@ -34,26 +32,7 @@ namespace Ezreal.EasyQuery.Models
         /// </summary>
         public EnumMatchMode MatchMode { get; set; }
 
-        //public StringComparison StringComparison { get; set; }
 
-        private static readonly MethodInfo _objectToStringMethod =
-            typeof(object).GetMethod(nameof(ToString), new Type[] { });
-
-        private static readonly MethodInfo _stringContainsMethod =
-            typeof(string).GetMethod(nameof(string.Contains), new Type[] { typeof(string) });
-
-        private static readonly MethodInfo _stringStartsWithMethod =
-            typeof(string).GetMethod(nameof(string.StartsWith), new Type[] { typeof(string) });
-
-        private static readonly MethodInfo _stringEndsWithMethod =
-            typeof(string).GetMethod(nameof(string.EndsWith), new Type[] { typeof(string) });
-
-        private static readonly MethodInfo _stringToLowerMethod =
-            typeof(string).GetMethod(nameof(string.ToLower), new Type[] { });
-
-        private static readonly MethodInfo _enumerableContainsMethod = typeof(Enumerable).GetMethods()
-            .FirstOrDefault(m =>
-                m.IsGenericMethod && m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
 
         public WhereCondition(string columnName, object columnValue, EnumMatchMode matchMode)
         {
@@ -198,10 +177,10 @@ namespace Ezreal.EasyQuery.Models
             Expression constant = ConstantExpression(value);
             Expression currentExpression = memberAccessor.Type == typeof(string)
                 ? (Expression)memberAccessor
-                : Expression.Call(memberAccessor, _objectToStringMethod);
-            currentExpression = Expression.Call(currentExpression, _stringToLowerMethod);
-            currentExpression = Expression.Call(currentExpression, _stringContainsMethod,
-                Expression.Call(constant, _stringToLowerMethod));
+                : Expression.Call(memberAccessor, Methods.ObjectToStringMethod);
+            currentExpression = Expression.Call(currentExpression, Methods.StringToLowerMethod);
+            currentExpression = Expression.Call(currentExpression, Methods.StringContainsMethod,
+                Expression.Call(constant, Methods.StringToLowerMethod));
             return currentExpression.AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
         }
         /// <summary>
@@ -365,10 +344,10 @@ namespace Ezreal.EasyQuery.Models
             }
 
             Expression constant = ConstantExpression(value);
-            Expression caller = memberAccessor.Type == typeof(string) ? (Expression)memberAccessor : Expression.Call(memberAccessor, _objectToStringMethod);
+            Expression caller = memberAccessor.Type == typeof(string) ? (Expression)memberAccessor : Expression.Call(memberAccessor, Methods.ObjectToStringMethod);
 
             return
-                Expression.Call(caller, _stringStartsWithMethod, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+                Expression.Call(caller, Methods.StringStartsWithMethod, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
         }
 
 
@@ -380,26 +359,11 @@ namespace Ezreal.EasyQuery.Models
             }
 
             Expression constant = ConstantExpression(value);
-            Expression caller = memberAccessor.Type == typeof(string) ? (Expression)memberAccessor : Expression.Call(memberAccessor, _objectToStringMethod);
+            Expression caller = memberAccessor.Type == typeof(string) ? (Expression)memberAccessor : Expression.Call(memberAccessor, Methods.ObjectToStringMethod);
 
             return
-                Expression.Call(caller, _stringEndsWithMethod, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
+                Expression.Call(caller, Methods.StringEndsWithMethod, constant).AttachAndAlsoMemberNotNullCheckExpressionOnLeft(memberAccessor);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
