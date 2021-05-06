@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 using Ezreal.EasyQuery.Enums;
+using System;
 
 namespace Ezreal.EasyQuery.Models
 {
@@ -63,9 +64,17 @@ namespace Ezreal.EasyQuery.Models
 
         private Expression SpliceExpression(Expression left, Expression right)
         {
+            if (left == null && right == null)
+            {
+                throw new ArgumentNullException($"{nameof(left)} and {nameof(right)} cannot be null at the same time");
+            }
             if (left == null)
             {
                 return right;
+            }
+            if (right == null)
+            {
+                return left;
             }
 
             return SpliceMode == EnumSpliceMode.AndAlso ? Expression.AndAlso(left, right) : Expression.OrElse(left, right);

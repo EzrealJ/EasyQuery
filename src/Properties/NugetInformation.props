@@ -1,0 +1,12 @@
+﻿  <Project>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Ezreal</Authors>
+        <Version>0.4.3</Version>
+        <Description>构造一个查询表达式</Description>
+        <Copyright>Ezreal</Copyright>
+        <PackageProjectUrl>https://github.com/EzrealJ/EasyQuery</PackageProjectUrl>
+        <PackageTags>EasyQuery</PackageTags>
+    </PropertyGroup>
+  </Project>

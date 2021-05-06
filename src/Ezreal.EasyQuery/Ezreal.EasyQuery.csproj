@@ -1,29 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-
-  <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;</TargetFrameworks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.3.13</Version>
-    <Authors>Ezreal</Authors>
-    <Description>https://github.com/EzrealJ/EasyQuery</Description>
-    <Copyright>Ezreal</Copyright>
-    <PackageProjectUrl>https://github.com/EzrealJ/EasyQuery</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/EzrealJ/EasyQuery</RepositoryUrl>
-  </PropertyGroup>
+  <Import Project="..\Properties\NugetInformation.props" />
+  <Import Project="..\Properties\AssemblyDocument.props" />
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
-  </ItemGroup>
+
+
 
 </Project>

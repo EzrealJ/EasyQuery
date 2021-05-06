@@ -35,7 +35,7 @@ namespace Ezreal.EasyQuery.Test
             //whereConditionFilterAttributes.Add(new WhereConditionFilterAttribute(Enums.EnumMatchMode.In, nameof(TestClassA.A)));
 
             WhereConditionArgumentsInterpreter whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpreter();
-            WhereConditionArguments a = whereConditionArgumentsInterpret.CheckConstraint(whereConditionArguments, whereConditionFilterAttributes);
+            WhereConditionArguments a = whereConditionArgumentsInterpret.ApplyFilter(whereConditionArguments, whereConditionFilterAttributes);
 
 
             WhereConditionArguments b = whereConditionArgumentsInterpret.Parse(whereConditionArguments);

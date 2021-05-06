@@ -22,8 +22,10 @@ namespace Ezreal.EasyQuery.Benchmark
             whereConditionArguments.WhereConditions.Add(new WhereCondition() { Key = "A24235634", Value = "", MatchMode = Enums.EnumMatchMode.Equal });
             whereConditionArguments.WhereConditions.Add(new WhereCondition() { Key = nameof(TestClassA.A), Value = "1", MatchMode = Enums.EnumMatchMode.NotEqual });
             whereConditionArguments.WhereConditions.Add(new WhereCondition() { Key = nameof(TestClassA.A), Value = new int[] { 1, 2, 3, 4 }, MatchMode = Enums.EnumMatchMode.In });
-            WhereConditionArguments<TestClassA> w2 = new WhereConditionArguments<TestClassA>();
-            w2.SpliceMode = Enums.EnumSpliceMode.OrElse;
+            WhereConditionArguments<TestClassA> w2 = new WhereConditionArguments<TestClassA>
+            {
+                SpliceMode = Enums.EnumSpliceMode.OrElse
+            };
             w2.WhereConditions.Add(new WhereCondition() { Key = nameof(TestClassA.B), Value = "30", MatchMode = Enums.EnumMatchMode.NotEqual });
             w2.WhereConditions.Add(new WhereCondition() { Key = "DDDDD", Value = "", MatchMode = Enums.EnumMatchMode.In });
             w2.WhereConditions.Add(new WhereCondition() { Key = nameof(TestClassA.A), Value = new int[] { 1, 2, 3, 4 }, MatchMode = Enums.EnumMatchMode.In });
@@ -37,7 +39,7 @@ namespace Ezreal.EasyQuery.Benchmark
 
 
             WhereConditionArgumentsInterpreter whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpreter();
-            WhereConditionArguments a = whereConditionArgumentsInterpret.CheckConstraint(whereConditionArguments, whereConditionFilterAttributes);
+            _ = whereConditionArgumentsInterpret.ApplyFilter(whereConditionArguments, whereConditionFilterAttributes);
 
 
             WhereConditionArguments b = whereConditionArgumentsInterpret.Parse(whereConditionArguments);

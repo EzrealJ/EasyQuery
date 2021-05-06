@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Properties\NugetInformation.props" />
+  <Import Project="..\Properties\AssemblyDocument.props" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ezreal.EasyQuery\Ezreal.EasyQuery.csproj" />
+  </ItemGroup>
+</Project>

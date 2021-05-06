@@ -12,23 +12,23 @@ namespace Ezreal.EasyQuery.Attributes
         public WhereConditionFilterAttribute(
     EnumMatchMode wherePattern = EnumMatchMode.Equal)
         {
-            AllowEnumMatchPattern = wherePattern;
+            AllowMatchPattern = wherePattern;
         }
         public WhereConditionFilterAttribute(
-            EnumMatchMode wherePattern = EnumMatchMode.Equal, params string[] columnName)
+            EnumMatchMode wherePattern = EnumMatchMode.Equal, params string[] keys)
         {
-            ColumnName = columnName;
-            AllowEnumMatchPattern = wherePattern;
+            Keys = keys;
+            AllowMatchPattern = wherePattern;
         }
 
         /// <summary>
         /// 搜索列
         /// </summary>
-        public virtual IEnumerable<string> ColumnName { get; }
+        public virtual IEnumerable<string> Keys { get; }
         /// <summary>
-        /// 匹配方式
+        /// 允许的匹配方式
         /// </summary>
-        public virtual EnumMatchMode AllowEnumMatchPattern { get; }
+        public virtual EnumMatchMode AllowMatchPattern { get; }
 
 
     }

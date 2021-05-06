@@ -44,7 +44,7 @@ namespace Ezreal.EasyQuery.ModelBinders
                 IEnumerable<WhereConditionFilterAttribute> whereParameterAttributes = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
                     .Where(attr => attr.GetType() == typeof(WhereConditionFilterAttribute)).Select(attr => attr as WhereConditionFilterAttribute);
                 WhereConditionArgumentsInterpreter whereConditionArgumentsInterpret = new WhereConditionArgumentsInterpreter();
-                whereParameterArguments = whereConditionArgumentsInterpret.CheckConstraint(whereParameterArguments, whereParameterAttributes?.ToList());
+                whereParameterArguments = whereConditionArgumentsInterpret.ApplyFilter(whereParameterArguments, whereParameterAttributes?.ToList());
                 whereParameterArguments = whereConditionArgumentsInterpret.Parse(whereParameterArguments);
 
             }

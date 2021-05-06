@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Ezreal.EasyQuery\Ezreal.EasyQuery.csproj" />
+    <ProjectReference Include="..\..\src\Ezreal.EasyQuery.AspNetCoreModelBinderProvider\Ezreal.EasyQuery.AspNetCoreModelBinderProvider.csproj" />
   </ItemGroup>
 
 </Project>
