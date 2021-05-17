@@ -50,7 +50,7 @@ namespace Ezreal.EasyQuery.ModelBinders
                 IEnumerable<OrderConditionFilterAttribute> orderConditionFilterAttribute = ((DefaultModelMetadata)bindingContext.ModelMetadata).Attributes.ParameterAttributes
                     .Where(attr => attr.GetType() == typeof(OrderConditionFilterAttribute)).Select(attr => attr as OrderConditionFilterAttribute);
                 OrderConditionArgumentsInterpreter orderConditionArgumentsInterpret = new OrderConditionArgumentsInterpreter();
-                orderConditionArguments = orderConditionArgumentsInterpret.CheckConstraint(orderConditionArguments, orderConditionFilterAttribute.ToList());
+                orderConditionArguments = orderConditionArgumentsInterpret.ApplyFilter(orderConditionArguments, orderConditionFilterAttribute.ToList());
 
             }
             catch (Exception ex)

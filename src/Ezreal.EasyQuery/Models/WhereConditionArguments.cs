@@ -66,7 +66,7 @@ namespace Ezreal.EasyQuery.Models
         {
             if (left == null && right == null)
             {
-                throw new ArgumentNullException($"{nameof(left)} and {nameof(right)} cannot be null at the same time");
+                throw new ArgumentNullException($"{nameof(left)} and {nameof(right)}"," cannot be null at the same time");
             }
             if (left == null)
             {
